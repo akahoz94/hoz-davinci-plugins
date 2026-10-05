@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>达芬奇开源插件汇总（一个成熟的剪辑猿收集整理）</title>
+<style>
+  :root{
+    --bg:#0f1117; --bg2:#161922; --bg3:#1d2130; --border:#2a2f3d; --border2:#363c4e;
+    --text:#e6e8ee; --text2:#9aa0ad; --text3:#6b7180;
+    --accent:#5b8cff; --accent2:#7c5cff; --green:#3fb950; --yellow:#d29922; --red:#f85149;
+    --tag-dctl:#a371f7; --tag-ofx:#5b8cff; --tag-fusion:#3fb950; --tag-enc:#d29922; --tag-ai:#f778ba; --tag-script:#58a6ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;line-height:1.6;padding:0 0 60px}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 20px}
+  header{background:linear-gradient(135deg,#161922,#1d2130);border-bottom:1px solid var(--border);padding:36px 0 28px}
+  header h1{font-size:26px;font-weight:700;letter-spacing:.3px}
+  header h1 .sub{color:var(--text2);font-weight:400;font-size:15px;margin-left:8px}
+  .meta{color:var(--text2);font-size:13px;margin-top:10px}
+  .stats{display:flex;gap:26px;flex-wrap:wrap;margin-top:18px}
+  .stat{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 18px;min-width:120px}
+  .stat .n{font-size:24px;font-weight:700;color:var(--accent)}
+  .stat .l{font-size:12px;color:var(--text2);margin-top:2px}
+  .controls{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 0;backdrop-filter:blur(8px)}
+  .controls .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .controls .row + .row{margin-top:6px}
+  .filters{display:flex;gap:9px;flex-wrap:wrap}
+  .btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:7px 14px;border-radius:20px;cursor:pointer;font-size:13px;transition:.15s;white-space:nowrap}
+  .btn:hover{border-color:var(--accent);color:var(--text)}
+  .btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .search{flex:1;min-width:200px;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:8px 14px;border-radius:8px;font-size:14px}
+  .search:focus{outline:none;border-color:var(--accent)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--text2);margin-top:8px;align-items:center}
+  .legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:middle}
+  .win{font-weight:600}
+  .win.y{color:var(--green)} .win.p{color:var(--yellow)} .win.n{color:var(--red)}
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13.5px}
+  thead th{position:sticky;top:54px;background:var(--bg2);text-align:left;padding:11px 12px;border-bottom:1px solid var(--border2);color:var(--text2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;user-select:none;z-index:5}
+  thead th:hover{color:var(--text)}
+  thead th .arr{opacity:.4;font-size:10px}
+  tbody tr{border-bottom:1px solid var(--border);transition:.1s}
+  tbody tr:hover{background:var(--bg2)}
+  tbody td{padding:11px 12px;vertical-align:top}
+  .repo{font-weight:600}
+  .repo .full{display:block;font-weight:400;color:var(--accent);font-size:11.5px;margin-top:3px;word-break:break-all;text-decoration:none;opacity:.85}
+  .repo .full:hover{text-decoration:underline;opacity:1}
+  .desc{color:var(--text2)}
+  .stars{font-variant-numeric:tabular-nums;color:var(--yellow);white-space:nowrap}
+  .tag{display:inline-block;padding:2px 9px;border-radius:5px;font-size:11px;font-weight:600;white-space:nowrap}
+  .tag.DCTL{background:rgba(163,113,247,.15);color:var(--tag-dctl);border:1px solid rgba(163,113,247,.3)}
+  .tag.OFX{background:rgba(91,140,255,.15);color:var(--tag-ofx);border:1px solid rgba(91,140,255,.3)}
+  .tag.Fusion{background:rgba(63,185,80,.15);color:var(--tag-fusion);border:1px solid rgba(63,185,80,.3)}
+  .tag.Encoder{background:rgba(210,153,34,.15);color:var(--tag-enc);border:1px solid rgba(210,153,34,.3)}
+  .tag.AI{background:rgba(247,120,186,.15);color:var(--tag-ai);border:1px solid rgba(247,120,186,.3)}
+  .tag.Script{background:rgba(88,166,255,.15);color:var(--tag-script);border:1px solid rgba(88,166,255,.3)}
+  .plat{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:600;white-space:nowrap;margin-left:8px;vertical-align:middle}
+  .plat.pf-both{background:rgba(88,166,255,.13);color:#9cc2ff;border:1px solid rgba(88,166,255,.3)}
+  .plat.pf-mac{background:rgba(63,185,80,.15);color:#5fd17a;border:1px solid rgba(63,185,80,.35)}
+  .plat.pf-win{background:rgba(210,153,34,.15);color:#e0b35a;border:1px solid rgba(210,153,34,.35)}
+  .plat.pf-linux{background:rgba(87,227,207,.13);color:#5fe3cf;border:1px solid rgba(87,227,207,.3)}
+  .lang{color:var(--text3);font-size:12px}
+  .empty{padding:40px;text-align:center;color:var(--text3)}
+  .note{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:14px 18px;margin:18px 0;font-size:13px;color:var(--text2)}
+  .note b{color:var(--text)}
+  .sec-title{font-size:18px;font-weight:700;margin:30px 0 6px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  .sec-title .cnt{color:var(--text3);font-weight:400;font-size:13px;margin-left:8px}
+  footer{margin-top:40px;padding:0 20px}
+  .disclaimer{max-width:920px;margin:0 auto;padding:16px 20px;border:1px solid var(--border);border-left:4px solid #d29922;border-radius:8px;background:rgba(210,153,34,.07);color:var(--text2);font-size:12.5px;line-height:1.75;text-align:left}
+  .disclaimer h4{margin:0 0 8px;font-size:13.5px;font-weight:700;color:var(--text1)}
+  .disclaimer p{margin:0 0 6px}
+  .disclaimer p:last-child{margin-bottom:0}
+  .disclaimer b{color:var(--text1)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>达芬奇开源插件汇总（一个成熟的剪辑猿收集整理）</h1>
+    <div class="meta">数据采集于 GitHub，按 Stars 排序 · 收录 Windows / Mac / Linux 跨平台及专属项目，并在「平台」列标注平台 · 2026-10-05 第二轮增补（共 160 条）</div>
+    <div class="stats">
+      <div class="stat"><div class="n" id="totalCount">160</div><div class="l">收录插件总数</div></div>
+      <div class="stat"><div class="n">6</div><div class="l">插件类型</div></div>
+      <div class="stat"><div class="n">DCTL</div><div class="l">色彩变换脚本</div></div>
+      <div class="stat"><div class="n">OFX</div><div class="l">OpenFX 原生插件</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="wrap">
+    <div class="row">
+      <div class="filters" id="filters">
+        <button class="btn active" data-f="all">全部</button>
+        <button class="btn" data-f="DCTL">DCTL</button>
+        <button class="btn" data-f="OFX">OFX</button>
+        <button class="btn" data-f="Fusion">Fusion</button>
+        <button class="btn" data-f="Encoder">编码器</button>
+        <button class="btn" data-f="AI">AI / 工作流</button>
+        <button class="btn" data-f="Script">脚本 / 工具</button>
+        <button class="btn" data-f="zh" style="border-color:var(--red);color:var(--red)">🇨🇳 中文版</button>
+      </div>
+      <input class="search" id="search" type="text" placeholder="搜索名称、描述、作者...">
+    </div>
+    <div class="row">
+      <div class="filters" id="platFilters">
+        <button class="btn active" data-p="all">平台：全部</button>
+        <button class="btn" data-p="both">🖥 通用</button>
+        <button class="btn" data-p="linux">🐧 Linux</button>
+        <button class="btn" data-p="mac"><svg width='12' height='12' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-2px'><path d='M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z'/></svg> Mac</button>
+        <button class="btn" data-p="win"><svg width='13' height='13' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-2px'><path d='M0 3.45L9.9 2.1v9.55H0V3.45zm10.95-.85L24 0v11.6H10.95V2.6zM0 12.35h9.9v9.65L0 20.6v-8.25zm10.95 0H24V24l-13.05-2.25V12.35z'/></svg> Win</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="note">
+    <b>关于平台标签：</b>「类型」列旁的徽章标明平台归属 —— <b>🖥 通用</b>：跨平台（DCTL、Fusion Fuse、Python/Lua 脚本、FFmpeg 编码器等）；<b>Win</b>：依赖 NVIDIA RTX 等 Mac 不可用技术；<b>Mac</b>：仅 macOS 可用；<b>🐧 Linux</b>：仅 Linux 可用（多为音频编解码/系统集成工具）。OFX 为二进制插件，标「通用」指源码/格式可跨平台编译，实际需对应平台构建版本。点击表头可排序，可按「平台」筛选。
+  </div>
+
+  <table id="tbl">
+    <thead>
+      <tr>
+        <th data-sort="repo">项目 <span class="arr"></span></th>
+        <th data-sort="desc">简介 <span class="arr"></span></th>
+        <th data-sort="type">类型 <span class="arr"></span></th>
+        <th data-sort="platform">平台 <span class="arr"></span></th>
+        <th data-sort="lang">语言 <span class="arr"></span></th>
+        <th data-sort="stars" class="num">★ Stars <span class="arr">▼</span></th>
+      </tr>
+    </thead>
+    <tbody id="tbody"><tr>
+    <td><div class="repo"><a href="https://github.com/tmoroney/auto-subs">auto-subs</a><a class="full" href="https://github.com/tmoroney/auto-subs">https://github.com/tmoroney/auto-subs</a></div></td>
+    <td class="desc">端侧字幕生成，直连达芬奇/Premiere/AE，基于 Whisper 语音转文字</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">TypeScript</td>
+    <td class="stars">4,315</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/samuelgursky/davinci-resolve-mcp">davinci-resolve-mcp</a><a class="full" href="https://github.com/samuelgursky/davinci-resolve-mcp">https://github.com/samuelgursky/davinci-resolve-mcp</a></div></td>
+    <td class="desc">DaVinci Resolve Studio 的 MCP 服务器集成，可用 AI 操控剪辑</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">3,342</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/octimot/StoryToolkitAI">StoryToolkitAI</a><a class="full" href="https://github.com/octimot/StoryToolkitAI">https://github.com/octimot/StoryToolkitAI</a></div></td>
+    <td class="desc">AI 剪辑工具，可转写、理解内容并搜索素材，集成 ChatGPT 等模型</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">1,021</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/zelikos/davincibox">davincibox</a><a class="full" href="https://github.com/zelikos/davincibox">https://github.com/zelikos/davincibox</a></div></td>
+    <td class="desc">Linux 上安装与运行达芬奇的容器化方案（含运行时依赖处理）</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-linux'>🐧 Linux</span></td>
+    <td class="lang">Shell</td>
+    <td class="stars">1,009</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/alexandremendoncaalvaro/CorridorKey-Runtime">CorridorKey-Runtime</a><a class="full" href="https://github.com/alexandremendoncaalvaro/CorridorKey-Runtime">https://github.com/alexandremendoncaalvaro/CorridorKey-Runtime</a></div></td>
+    <td class="desc">原生 AI 抠像运行时与 OFX 插件，与 Corridor Digital 合作开发，支持 NVIDIA RTX</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-win'><svg width='13' height='13' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-1px'><path d='M0 3.45L9.9 2.1v9.55H0V3.45zm10.95-.85L24 0v11.6H10.95V2.6zM0 12.35h9.9v9.65L0 20.6v-8.25zm10.95 0H24V24l-13.05-2.25V12.35z'/></svg> Win</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">755</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/jedypod/open-display-transform">open-display-transform</a><a class="full" href="https://github.com/jedypod/open-display-transform">https://github.com/jedypod/open-display-transform</a></div></td>
+    <td class="desc">宽色域场景线性数据渲染为 SDR/HDR 显示的工具集（DCTL/Blink）</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">525</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/liuluhaixiu/davinci-autoedit-agent">davinci-autoedit-agent</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/liuluhaixiu/davinci-autoedit-agent">https://github.com/liuluhaixiu/davinci-autoedit-agent</a></div></td>
+    <td class="desc">基于 MCP 的全自动剪辑 Agent（Codex 技能集）：素材分析→脚本撰写→TTS→自动搭建达芬奇时间线，需 Studio 18.5+</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">479</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/thatcherfreeman/utility-dctls">utility-dctls (thatcherfreeman)</a><a class="full" href="https://github.com/thatcherfreeman/utility-dctls">https://github.com/thatcherfreeman/utility-dctls</a></div></td>
+    <td class="desc">创意与实用 DCTL 合集，持续更新</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">429</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/barckley75/resolve-claude-mcp">resolve-claude-mcp</a><a class="full" href="https://github.com/barckley75/resolve-claude-mcp">https://github.com/barckley75/resolve-claude-mcp</a></div></td>
+    <td class="desc">将达芬奇 Studio 接入 Claude 的 MCP 服务器，读写双向</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">374</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/baldavenger/DCTLs">DCTLs</a><a class="full" href="https://github.com/baldavenger/DCTLs">https://github.com/baldavenger/DCTLs</a></div></td>
+    <td class="desc">达芬奇 CTL 色彩变换脚本库，知名老牌项目</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">360</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/Greenysmac/awesome-davinci-resolve">awesome-davinci-resolve</a><a class="full" href="https://github.com/Greenysmac/awesome-davinci-resolve">https://github.com/Greenysmac/awesome-davinci-resolve</a></div></td>
+    <td class="desc">社区精选的达芬奇插件/工具/资源列表（r/colorists 维护）</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">333</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/minghe36/haoone-app">haoone-app</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/minghe36/haoone-app">https://github.com/minghe36/haoone-app</a></div></td>
+    <td class="desc">AI专业字幕软件，含达芬奇字幕插件，中英转录识别96%+，支持说话人识别、智能拆行、AI校正、双语字幕</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">MDX</td>
+    <td class="stars">329</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/juanpablozambrano/dctl">dctl (juanpablozambrano)</a><a class="full" href="https://github.com/juanpablozambrano/dctl">https://github.com/juanpablozambrano/dctl</a></div></td>
+    <td class="desc">DCTL 合集（创意调色工具）</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">325</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/elliotmatson/docker-davinci-resolve-project-server">docker-davinci-resolve-project-server</a><a class="full" href="https://github.com/elliotmatson/docker-davinci-resolve-project-server">https://github.com/elliotmatson/docker-davinci-resolve-project-server</a></div></td>
+    <td class="desc">Docker 化项目服务器：自动备份 + 新版 PostgreSQL</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">320</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/h3rz3n/davinci-helper">davinci-helper</a><a class="full" href="https://github.com/h3rz3n/davinci-helper">https://github.com/h3rz3n/davinci-helper</a></div></td>
+    <td class="desc">Linux 上的达芬奇伴侣应用</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-linux'>🐧 Linux</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">316</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/EdvinNilsson/ffmpeg_encoder_plugin">ffmpeg_encoder_plugin</a><a class="full" href="https://github.com/EdvinNilsson/ffmpeg_encoder_plugin">https://github.com/EdvinNilsson/ffmpeg_encoder_plugin</a></div></td>
+    <td class="desc">FFmpeg 编码器插件，支持 H264/H265/AV1，跨平台含 Windows</td>
+    <td><span class="tag Encoder">Encoder</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">241</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/viccowang/viccovlog-davinci-materials">viccovlog-davinci-materials</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/viccowang/viccovlog-davinci-materials">https://github.com/viccowang/viccovlog-davinci-materials</a></div></td>
+    <td class="desc">达芬奇 Resolve 中文入门教程素材包，适合初学者跟练</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">RTF</td>
+    <td class="stars">231</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/Akascape/Rembg-Fuse">Rembg-Fuse</a><a class="full" href="https://github.com/Akascape/Rembg-Fuse">https://github.com/Akascape/Rembg-Fuse</a></div></td>
+    <td class="desc">免费开源 AI 插件，在达芬奇 Fusion 中自动抠图去背景</td>
+    <td><span class="tag Fusion">Fusion</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">221</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/pedrolabonia/pydavinci">pydavinci</a><a class="full" href="https://github.com/pedrolabonia/pydavinci">https://github.com/pedrolabonia/pydavinci</a></div></td>
+    <td class="desc">帮助脚本化控制达芬奇的 Python 包</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">181</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/xtremestuff/protune-transforms">protune-transforms</a><a class="full" href="https://github.com/xtremestuff/protune-transforms">https://github.com/xtremestuff/protune-transforms</a></div></td>
+    <td class="desc">GoPro GP-Log2/GP-Log/Protune 的 ACES IDT 与 YRGB 变换</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Shell</td>
+    <td class="stars">179</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/xtremestuff/resolve-dctl">resolve-dctl</a><a class="full" href="https://github.com/xtremestuff/resolve-dctl">https://github.com/xtremestuff/resolve-dctl</a></div></td>
+    <td class="desc">达芬奇 DCTL 库</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">164</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/Demystify-Color/DCTLs">DCTLs (Demystify)</a><a class="full" href="https://github.com/Demystify-Color/DCTLs">https://github.com/Demystify-Color/DCTLs</a></div></td>
+    <td class="desc">Nico Fink 编写的免费 DCTL，配套教程 demystify-color.com</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">163</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/baldavenger/BaldavengerPlugins">BaldavengerPlugins</a><a class="full" href="https://github.com/baldavenger/BaldavengerPlugins">https://github.com/baldavenger/BaldavengerPlugins</a></div></td>
+    <td class="desc">达芬奇 OFX 插件集，明确支持 macOS / Win10 / Linux</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">147</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/DayadaUP/claude-code-auto-video-edit">claude-code-auto-video-edit</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/DayadaUP/claude-code-auto-video-edit">https://github.com/DayadaUP/claude-code-auto-video-edit</a></div></td>
+    <td class="desc">达芬奇自动口播粗剪：Whisper 转写→智能分析剪辑点→生成时间线+SRT</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">121</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/Wavechaser/NamiColor">NamiColor</a><a class="full" href="https://github.com/Wavechaser/NamiColor">https://github.com/Wavechaser/NamiColor</a></div></td>
+    <td class="desc">DCTL 脚本，高效线性化胶片扫描并启用场景参考工作流</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">121</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/toxblh/davinci-linux-aac-codec">davinci-linux-aac-codec</a><a class="full" href="https://github.com/toxblh/davinci-linux-aac-codec">https://github.com/toxblh/davinci-linux-aac-codec</a></div></td>
+    <td class="desc">Linux 版 AAC 音频编码插件</td>
+    <td><span class="tag Encoder">Encoder</span></td>
+    <td><span class='plat pf-linux'>🐧 Linux</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">121</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/hiteshK03/davinci-resolve-mcp">davinci-resolve-mcp (Free)</a><a class="full" href="https://github.com/hiteshK03/davinci-resolve-mcp">https://github.com/hiteshK03/davinci-resolve-mcp</a></div></td>
+    <td class="desc">唯一支持达芬奇免费版的 MCP 桥接，162 工具（155/162 免费可用），内置本地 AI（Demucs 人声分离 / rembg 抠像 / Whisper 转录）</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">116</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/thatcherfreeman/dwg-transforms">dwg-transforms</a><a class="full" href="https://github.com/thatcherfreeman/dwg-transforms">https://github.com/thatcherfreeman/dwg-transforms</a></div></td>
+    <td class="desc">各色彩空间→DaVinci Wide Gamut/Intermediate 转换 DCTL</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">111</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/sobotka/agx-resolve">agx-resolve</a><a class="full" href="https://github.com/sobotka/agx-resolve">https://github.com/sobotka/agx-resolve</a></div></td>
+    <td class="desc">AgX 画面形成（Picture Formation）的达芬奇实现</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">111</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/hotgluebanjo/halation-dctl">halation-dctl</a><a class="full" href="https://github.com/hotgluebanjo/halation-dctl">https://github.com/hotgluebanjo/halation-dctl</a></div></td>
+    <td class="desc">简洁的光晕（Halation）DCTL</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">102</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/x-raym/davinci-resolve-scripts">davinci-resolve-scripts (x-raym)</a><a class="full" href="https://github.com/x-raym/davinci-resolve-scripts">https://github.com/x-raym/davinci-resolve-scripts</a></div></td>
+    <td class="desc">基于 Resolve Script API 的实用脚本合集</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Lua</td>
+    <td class="stars">98</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/saog0721/davinci-resolve-dlss5">resolve-dlss5</a><a class="full" href="https://github.com/saog0721/davinci-resolve-dlss5">https://github.com/saog0721/davinci-resolve-dlss5</a></div></td>
+    <td class="desc">实验性 DLSS 神经渲染降噪 OFX：NVIDIA RTX 40/50 专用，Resolve 20.0.1+，最多三级降噪</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-win'><svg width='13' height='13' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-1px'><path d='M0 3.45L9.9 2.1v9.55H0V3.45zm10.95-.85L24 0v11.6H10.95V2.6zM0 12.35h9.9v9.65L0 20.6v-8.25zm10.95 0H24V24l-13.05-2.25V12.35z'/></svg> Win</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">94</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/hotgluebanjo/tetrainterp-dctl">tetrainterp-dctl</a><a class="full" href="https://github.com/hotgluebanjo/tetrainterp-dctl">https://github.com/hotgluebanjo/tetrainterp-dctl</a></div></td>
+    <td class="desc">四面体插值 DCTL 的补充扩展</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">81</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/nmbr73/Shaderfuse">Shaderfuse</a><a class="full" href="https://github.com/nmbr73/Shaderfuse">https://github.com/nmbr73/Shaderfuse</a></div></td>
+    <td class="desc">将 Shadertoy WebGL 着色器转为 DCTL Fuse，明确支持 Windows+NVIDIA</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Lua</td>
+    <td class="stars">80</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/mikaelsundell/photographic-dctls">photographic-dctls</a><a class="full" href="https://github.com/mikaelsundell/photographic-dctls">https://github.com/mikaelsundell/photographic-dctls</a></div></td>
+    <td class="desc">色彩科学数学实验 DCTL，含 LogC/ACES AP0/Cineon 等</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">79</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/apvlv/davinci-resolve-mcp">resolve-mcp (apvlv)</a><a class="full" href="https://github.com/apvlv/davinci-resolve-mcp">https://github.com/apvlv/davinci-resolve-mcp</a></div></td>
+    <td class="desc">MCP 服务器，对接 DaVinci Resolve 与 Fusion，达芬奇 20/21 全 API 覆盖（76+ 工具、20 资源）</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">78</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/in03/proxima">proxima</a><a class="full" href="https://github.com/in03/proxima">https://github.com/in03/proxima</a></div></td>
+    <td class="desc">从达芬奇直接转码源媒体，多机并行编码快速生成代理</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">74</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/baldavenger/ACES_DCTL">ACES_DCTL</a><a class="full" href="https://github.com/baldavenger/ACES_DCTL">https://github.com/baldavenger/ACES_DCTL</a></div></td>
+    <td class="desc">ACES v1.3 DCTLs（需达芬奇 Studio）</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">73</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/minghe36/vinci-subtitle-man">vinci-subtitle-man</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/minghe36/vinci-subtitle-man">https://github.com/minghe36/vinci-subtitle-man</a></div></td>
+    <td class="desc">达芬奇剪辑软件 AI 自动生成字幕插件（Lua），中文界面</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Lua</td>
+    <td class="stars">73</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/deric/DaVinciResolve-metadata">DaVinciResolve-metadata</a><a class="full" href="https://github.com/deric/DaVinciResolve-metadata">https://github.com/deric/DaVinciResolve-metadata</a></div></td>
+    <td class="desc">EXIF 元数据同步工具</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Lua</td>
+    <td class="stars">70</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/MoazElgabry/DCTLs">MoazElgabry DCTLs</a><a class="full" href="https://github.com/MoazElgabry/DCTLs">https://github.com/MoazElgabry/DCTLs</a></div></td>
+    <td class="desc">Moaz Elgabry 的达芬奇 DCTL 合集</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">68</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/cutbypham/awesome-davinci-resolve">awesome-davinci-resolve (pham)</a><a class="full" href="https://github.com/cutbypham/awesome-davinci-resolve">https://github.com/cutbypham/awesome-davinci-resolve</a></div></td>
+    <td class="desc">达芬奇相关资源精选列表</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Lua</td>
+    <td class="stars">66</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/mazsola2k/ai-video-editor">ai-video-editor</a><a class="full" href="https://github.com/mazsola2k/ai-video-editor">https://github.com/mazsola2k/ai-video-editor</a></div></td>
+    <td class="desc">基于视觉大模型的 AI 视频剪辑端到端工作流</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">65</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/cobanov/autocut">autocut</a><a class="full" href="https://github.com/cobanov/autocut">https://github.com/cobanov/autocut</a></div></td>
+    <td class="desc">去静音自动剪辑桌面工具（Rust+Tauri），导出达芬奇友好 FCPXML</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Rust</td>
+    <td class="stars">65</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/VilleOlof/Toolbox">Toolbox</a><a class="full" href="https://github.com/VilleOlof/Toolbox">https://github.com/VilleOlof/Toolbox</a></div></td>
+    <td class="desc">加速达芬奇工作流的模块化工具箱（已归档）</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Svelte</td>
+    <td class="stars">61</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/fukco/DaVinciResolveScript">DaVinciResolveScript</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/fukco/DaVinciResolveScript">https://github.com/fukco/DaVinciResolveScript</a></div></td>
+    <td class="desc">元数据解析与自定义规则调色工具，2026年4月推出创意集 Creative Resolve</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Lua</td>
+    <td class="stars">57</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/Poechant/davinci-resolve-cli">davinci-resolve-cli</a><a class="full" href="https://github.com/Poechant/davinci-resolve-cli">https://github.com/Poechant/davinci-resolve-cli</a></div></td>
+    <td class="desc">达芬奇 18+ 命令行工具，控制项目/媒体/渲染/时间线，支持 AI 代理</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">52</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/xrz1411/reference-match">reference-match</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/xrz1411/reference-match">https://github.com/xrz1411/reference-match</a></div></td>
+    <td class="desc">本地优先参考图色彩匹配工具：分析色调风格并生成匹配方案</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">52</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/jacobbvfx/ResolveRPC">ResolveRPC</a><a class="full" href="https://github.com/jacobbvfx/ResolveRPC">https://github.com/jacobbvfx/ResolveRPC</a></div></td>
+    <td class="desc">Java 编写的达芬奇简单 RPC 客户端（含 Discord 状态展示）</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Java</td>
+    <td class="stars">50</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/nowrep/dvcp-vaapi">dvcp-vaapi</a><a class="full" href="https://github.com/nowrep/dvcp-vaapi">https://github.com/nowrep/dvcp-vaapi</a></div></td>
+    <td class="desc">Linux VAAPI 硬件编码插件</td>
+    <td><span class="tag Encoder">Encoder</span></td>
+    <td><span class='plat pf-linux'>🐧 Linux</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">47</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/david-ca6/resolve-opencaptions">resolve-opencaptions</a><a class="full" href="https://github.com/david-ca6/resolve-opencaptions">https://github.com/david-ca6/resolve-opencaptions</a></div></td>
+    <td class="desc">免费开源多轨字幕→Text+ 工具，无订阅无墙</td>
+    <td><span class="tag Fusion">Fusion</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">42</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/veritus-git/badwords">badwords</a><a class="full" href="https://github.com/veritus-git/badwords">https://github.com/veritus-git/badwords</a></div></td>
+    <td class="desc">更好的达芬奇文本化剪辑体验</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">41</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/KaurHendrikson/DaVinci-Resolve-DCTLs">DaVinci-Resolve-DCTLs</a><a class="full" href="https://github.com/KaurHendrikson/DaVinci-Resolve-DCTLs">https://github.com/KaurHendrikson/DaVinci-Resolve-DCTLs</a></div></td>
+    <td class="desc">达芬奇 DCTL 合集</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">38</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/Puppetworks-Animation-Studio/deadline-davinci-resolve">deadline-davinci-resolve</a><a class="full" href="https://github.com/Puppetworks-Animation-Studio/deadline-davinci-resolve">https://github.com/Puppetworks-Animation-Studio/deadline-davinci-resolve</a></div></td>
+    <td class="desc">Thinkbox Deadline 渲染农场管理达芬奇插件</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">38</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/wassermanproductions/unofficial-davinci-mcp">unofficial-davinci-mcp</a><a class="full" href="https://github.com/wassermanproductions/unofficial-davinci-mcp">https://github.com/wassermanproductions/unofficial-davinci-mcp</a></div></td>
+    <td class="desc">让任意 AI Agent 操控达芬奇：Studio 实时控制，免费版走 FCPXML/LUT 工作流</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">36</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/wheheohu/pybmd">pybmd</a><a class="full" href="https://github.com/wheheohu/pybmd">https://github.com/wheheohu/pybmd</a></div></td>
+    <td class="desc">达芬奇 API 的 Python 封装库</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">36</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/brunocbreis/FuAlign">FuAlign</a><a class="full" href="https://github.com/brunocbreis/FuAlign">https://github.com/brunocbreis/FuAlign</a></div></td>
+    <td class="desc">为达芬奇 Fusion 添加对齐与分布功能的插件</td>
+    <td><span class="tag Fusion">Fusion</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">34</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/akahoz94/davinci-21-chinese-manual">davinci-21-chinese-manual</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/akahoz94/davinci-21-chinese-manual">https://github.com/akahoz94/davinci-21-chinese-manual</a></div></td>
+    <td class="desc">达芬奇 21 中文操作手册离线浏览器 + AI skill（快捷键速查/功能检索/内置插件中英对照）</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">HTML</td>
+    <td class="stars">33</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/caryknoop/DCTL">DCTL (caryknoop)</a><a class="full" href="https://github.com/caryknoop/DCTL">https://github.com/caryknoop/DCTL</a></div></td>
+    <td class="desc">达芬奇 DCTL 文件集</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">31</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/hooperh/subfix">subfix</a><a class="full" href="https://github.com/hooperh/subfix">https://github.com/hooperh/subfix</a></div></td>
+    <td class="desc">达芬奇字幕工作流脚本</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Lua</td>
+    <td class="stars">31</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/purzbeats/purzos-ofx">purzos-ofx</a><a class="full" href="https://github.com/purzbeats/purzos-ofx">https://github.com/purzbeats/purzos-ofx</a></div></td>
+    <td class="desc">原生 OpenFX 复古/模拟/故障/CRT-VHS 视频特效插件</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">29</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/helios1138/filmeon">filmeon</a><a class="full" href="https://github.com/helios1138/filmeon">https://github.com/helios1138/filmeon</a></div></td>
+    <td class="desc">物理化、色彩管理的 HDR 胶片负片反转模型</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">29</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/hexitnz/resolve-linux-studio-aac-fdk-encoder-plugin">resolve-linux-studio-aac-fdk-encoder-plugin</a><a class="full" href="https://github.com/hexitnz/resolve-linux-studio-aac-fdk-encoder-plugin">https://github.com/hexitnz/resolve-linux-studio-aac-fdk-encoder-plugin</a></div></td>
+    <td class="desc">Linux Studio 高质量 AAC（FDK）编码插件</td>
+    <td><span class="tag Encoder">Encoder</span></td>
+    <td><span class='plat pf-linux'>🐧 Linux</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">29</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/eric-with-a-c/resolve-otio">resolve-otio</a><a class="full" href="https://github.com/eric-with-a-c/resolve-otio">https://github.com/eric-with-a-c/resolve-otio</a></div></td>
+    <td class="desc">达芬奇 OpenTimelineIO 插件</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">27</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/gloriouseggroll/dvcp-aac">dvcp-aac</a><a class="full" href="https://github.com/gloriouseggroll/dvcp-aac">https://github.com/gloriouseggroll/dvcp-aac</a></div></td>
+    <td class="desc">AAC 音频编解码插件，含导入支持（Linux）</td>
+    <td><span class="tag Encoder">Encoder</span></td>
+    <td><span class='plat pf-linux'>🐧 Linux</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">27</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/f4mi/colortablething">colortablething</a><a class="full" href="https://github.com/f4mi/colortablething">https://github.com/f4mi/colortablething</a></div></td>
+    <td class="desc">向达芬奇注入自定义色彩匹配表</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">27</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/Senthil360/RenderHub-DCTLs">RenderHub-DCTLs</a><a class="full" href="https://github.com/Senthil360/RenderHub-DCTLs">https://github.com/Senthil360/RenderHub-DCTLs</a></div></td>
+    <td class="desc">达芬奇 Studio 的 DCTL 合集</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Shell</td>
+    <td class="stars">26</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/flamexnreal/davinci-resolve-ai-bridge-mcp">davinci-resolve-ai-bridge-mcp</a><a class="full" href="https://github.com/flamexnreal/davinci-resolve-ai-bridge-mcp">https://github.com/flamexnreal/davinci-resolve-ai-bridge-mcp</a></div></td>
+    <td class="desc">本地 MCP 桥，让 Claude/Codex/Cursor 直接读写达芬奇当前工程（含免费版），无需复制粘贴</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">26</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/hoyt-harness/davinci-mcp-professional">davinci-mcp-professional</a><a class="full" href="https://github.com/hoyt-harness/davinci-mcp-professional">https://github.com/hoyt-harness/davinci-mcp-professional</a></div></td>
+    <td class="desc">企业级 MCP 服务器，把达芬奇 Studio 全功能暴露给 AI Agent（Claude/ChatGPT/Gemini 等），支持 Linux/Windows/Mac</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">25</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/josephg/resolve-aacfix">resolve-aacfix</a><a class="full" href="https://github.com/josephg/resolve-aacfix">https://github.com/josephg/resolve-aacfix</a></div></td>
+    <td class="desc">二进制补丁库，恢复 Linux 版 AAC 音频支持</td>
+    <td><span class="tag Encoder">Encoder</span></td>
+    <td><span class='plat pf-linux'>🐧 Linux</span></td>
+    <td class="lang">Shell</td>
+    <td class="stars">25</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/jai-panjwani/DCTLS">DCTLS</a><a class="full" href="https://github.com/jai-panjwani/DCTLS">https://github.com/jai-panjwani/DCTLS</a></div></td>
+    <td class="desc">达芬奇 DCTL 脚本</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">23</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/isaacrowntree/color-grade-ai">color-grade-ai</a><a class="full" href="https://github.com/isaacrowntree/color-grade-ai">https://github.com/isaacrowntree/color-grade-ai</a></div></td>
+    <td class="desc">AI 生成 .cube 调色 LUT 的 Claude Code 技能，支持达芬奇/Premiere</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">23</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/chaiwithjai/davinci-resolve-claude-skills">davinci-resolve-claude-skills</a><a class="full" href="https://github.com/chaiwithjai/davinci-resolve-claude-skills">https://github.com/chaiwithjai/davinci-resolve-claude-skills</a></div></td>
+    <td class="desc">面向内容创作者与开发者的达芬奇 Claude Code 技能集</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">23</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/gitcapoom/corridorkey_ofx">corridorkey_ofx</a><a class="full" href="https://github.com/gitcapoom/corridorkey_ofx">https://github.com/gitcapoom/corridorkey_ofx</a></div></td>
+    <td class="desc">将 CorridorKey AI 绿幕抠像器引入达芬奇 20 的 OFX 插件</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-win'><svg width='13' height='13' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-1px'><path d='M0 3.45L9.9 2.1v9.55H0V3.45zm10.95-.85L24 0v11.6H10.95V2.6zM0 12.35h9.9v9.65L0 20.6v-8.25zm10.95 0H24V24l-13.05-2.25V12.35z'/></svg> Win</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">22</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/mitkunz/resolve_DCTLs">resolve_DCTLs</a><a class="full" href="https://github.com/mitkunz/resolve_DCTLs">https://github.com/mitkunz/resolve_DCTLs</a></div></td>
+    <td class="desc">面向日常调色任务的自制 DCTL 合集</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">22</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/fabiocolor/Faded-Balancer-DCTL">Faded-Balancer-DCTL</a><a class="full" href="https://github.com/fabiocolor/Faded-Balancer-DCTL">https://github.com/fabiocolor/Faded-Balancer-DCTL</a></div></td>
+    <td class="desc">重新平衡褪色胶片扫描的 DCTL，从 Releases 下载 .dctl</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">22</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/Akascape/RemObj-Fuse">RemObj-Fuse</a><a class="full" href="https://github.com/Akascape/RemObj-Fuse">https://github.com/Akascape/RemObj-Fuse</a></div></td>
+    <td class="desc">免费开源 AI 插件，用 LaMa ONNX 模型在 Fusion 中自动移除物体</td>
+    <td><span class="tag Fusion">Fusion</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">20</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/oliwoli/HushCut">HushCut</a><a class="full" href="https://github.com/oliwoli/HushCut">https://github.com/oliwoli/HushCut</a></div></td>
+    <td class="desc">达芬奇插件，波形可视化辅助剪辑</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">TypeScript</td>
+    <td class="stars">19</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/ra100/dctl-utils">dctl-utils</a><a class="full" href="https://github.com/ra100/dctl-utils">https://github.com/ra100/dctl-utils</a></div></td>
+    <td class="desc">小型达芬奇 DCTL 工具集</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">19</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/bobtronic73/free-DCTL">free-DCTL</a><a class="full" href="https://github.com/bobtronic73/free-DCTL">https://github.com/bobtronic73/free-DCTL</a></div></td>
+    <td class="desc">DCTL 文件合集，多为达芬奇小工具</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">19</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/misonlarp/fusion-flow">fusion-flow</a><a class="full" href="https://github.com/misonlarp/fusion-flow">https://github.com/misonlarp/fusion-flow</a></div></td>
+    <td class="desc">达芬奇 Fusion 贝塞尔曲线编辑器</td>
+    <td><span class="tag Fusion">Fusion</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Batchfile</td>
+    <td class="stars">19</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/emjjkk/beat-detection">beat-detection</a><a class="full" href="https://github.com/emjjkk/beat-detection">https://github.com/emjjkk/beat-detection</a></div></td>
+    <td class="desc">节拍/起音检测，生成时间戳与 .edl 标记文件供达芬奇使用</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">19</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/2445868686/DaVinci-Resolve-TTS">DaVinci-Resolve-TTS</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/2445868686/DaVinci-Resolve-TTS">https://github.com/2445868686/DaVinci-Resolve-TTS</a></div></td>
+    <td class="desc">达芬奇 TTS 语音合成插件，支持 Azure / MiniMax / OpenAI</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">18</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/olegkupshukov/claude-resolve">claude-resolve</a><a class="full" href="https://github.com/olegkupshukov/claude-resolve">https://github.com/olegkupshukov/claude-resolve</a></div></td>
+    <td class="desc">AI 动态图形生成与达芬奇助手（Studio）</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">JavaScript</td>
+    <td class="stars">18</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/octavioah/resolve-nuke-bridge">resolve-nuke-bridge</a><a class="full" href="https://github.com/octavioah/resolve-nuke-bridge">https://github.com/octavioah/resolve-nuke-bridge</a></div></td>
+    <td class="desc">在达芬奇与 Nuke 之间互传片段的 Python 桥</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">18</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/gingray/openfx-template">openfx-template</a><a class="full" href="https://github.com/gingray/openfx-template">https://github.com/gingray/openfx-template</a></div></td>
+    <td class="desc">达芬奇 OFX 插件开发引导模板</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">16</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/zzzEffects/zzzFX">zzzFX</a><a class="full" href="https://github.com/zzzEffects/zzzFX">https://github.com/zzzEffects/zzzFX</a></div></td>
+    <td class="desc">开源免费视频特效插件系列，支持 AE/Premiere 及 OFX 宿主（达芬奇/VEGAS）</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Rust</td>
+    <td class="stars">15</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/olduvai-jp/dctl-mlaa">dctl-mlaa</a><a class="full" href="https://github.com/olduvai-jp/dctl-mlaa">https://github.com/olduvai-jp/dctl-mlaa</a></div></td>
+    <td class="desc">形态学抗锯齿（MLAA）移植为 DCTL</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">15</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/gdaswani/prores_encoder">prores_encoder</a><a class="full" href="https://github.com/gdaswani/prores_encoder">https://github.com/gdaswani/prores_encoder</a></div></td>
+    <td class="desc">ProRes 导出插件，后端基于 FFmpeg</td>
+    <td><span class="tag Encoder">Encoder</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">14</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/OwenYou/DavinciResolveDCTL_HKEstimation">HK-Estimation</a><a class="full" href="https://github.com/OwenYou/DavinciResolveDCTL_HKEstimation">https://github.com/OwenYou/DavinciResolveDCTL_HKEstimation</a></div></td>
+    <td class="desc">Helmholtz-Kohlrausch 效应估算与补偿，含 4 种方法</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">14</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/mhadifilms/dvr">dvr</a><a class="full" href="https://github.com/mhadifilms/dvr">https://github.com/mhadifilms/dvr</a></div></td>
+    <td class="desc">达芬奇 Resolve CLI + Python 库 + MCP 服务器，声明式规格与结构化 JSON 输出，自动化剪辑/调色/渲染</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">14</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/moazelgabry/me_opendrt-ofx">opendrt-ofx</a><a class="full" href="https://github.com/moazelgabry/me_opendrt-ofx">https://github.com/moazelgabry/me_opendrt-ofx</a></div></td>
+    <td class="desc">Jed Smith 的 OpenDRT 显示变换 OFX 移植</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">14</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/kemerd/openosv">openosv</a><a class="full" href="https://github.com/kemerd/openosv">https://github.com/kemerd/openosv</a></div></td>
+    <td class="desc">DJI Osmo 360（.OSV）开源工作流：原生导入 + CUDA 加速（Premiere/达芬奇）</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">14</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/gdaswani/x264_encoder">x264_encoder</a><a class="full" href="https://github.com/gdaswani/x264_encoder">https://github.com/gdaswani/x264_encoder</a></div></td>
+    <td class="desc">基于 Blackmagic 官方示例修改的 x264 编码器插件</td>
+    <td><span class="tag Encoder">Encoder</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">13</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/demystify-color/dmc-baldavengerofx-macosarm64">baldavengerofx-macosarm64</a><a class="full" href="https://github.com/demystify-color/dmc-baldavengerofx-macosarm64">https://github.com/demystify-color/dmc-baldavengerofx-macosarm64</a></div></td>
+    <td class="desc">BaldavengerOFX 的 Apple Silicon（M 系列）移植版</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-mac'><svg width='12' height='12' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-1px'><path d='M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z'/></svg> Mac</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">13</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/OwenYou/DavinciResolveDCTL_RemoveColorMask">RemoveColorMask</a><a class="full" href="https://github.com/OwenYou/DavinciResolveDCTL_RemoveColorMask">https://github.com/OwenYou/DavinciResolveDCTL_RemoveColorMask</a></div></td>
+    <td class="desc">交互式 DCTL，可移除胶片色彩蒙版</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">12</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/rodrigomas/DCTLs">rodrigomas DCTLs</a><a class="full" href="https://github.com/rodrigomas/DCTLs">https://github.com/rodrigomas/DCTLs</a></div></td>
+    <td class="desc">达芬奇 CTL 脚本</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">12</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/Akascape/PluginLibrary-Resolve">PluginLibrary-Resolve</a><a class="full" href="https://github.com/Akascape/PluginLibrary-Resolve">https://github.com/Akascape/PluginLibrary-Resolve</a></div></td>
+    <td class="desc">Akascape 插件库——一个应用管理其所有达芬奇插件</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">HTML</td>
+    <td class="stars">11</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/FusionPixelStudio/Davinci-Resolve-Functions-Toolkit">Davinci-Resolve-Functions-Toolkit</a><a class="full" href="https://github.com/FusionPixelStudio/Davinci-Resolve-Functions-Toolkit">https://github.com/FusionPixelStudio/Davinci-Resolve-Functions-Toolkit</a></div></td>
+    <td class="desc">VSCode 扩展：达芬奇脚本片段、自动化与开发辅助，提升 Resolve Scripting 效率</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">TypeScript</td>
+    <td class="stars">11</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/Microck/boilify">boilify</a><a class="full" href="https://github.com/Microck/boilify">https://github.com/Microck/boilify</a></div></td>
+    <td class="desc">热浪扭曲/沸腾特效 OFX 插件</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">10</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/murtazatunio/lenscorrect-ofx">lenscorrect-ofx</a><a class="full" href="https://github.com/murtazatunio/lenscorrect-ofx">https://github.com/murtazatunio/lenscorrect-ofx</a></div></td>
+    <td class="desc">镜头校正 OFX 插件，便于 RAW 编辑流程，含暗角校正</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">10</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/allwavemedia/resolve-ai-toolkit">resolve-ai-toolkit</a><a class="full" href="https://github.com/allwavemedia/resolve-ai-toolkit">https://github.com/allwavemedia/resolve-ai-toolkit</a></div></td>
+    <td class="desc">AI 驱动的 MCP 工具包，21 个工具覆盖 Fusion/VFX、剪辑、音频、调色（macOS 优先）</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-mac'><svg width='12' height='12' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-1px'><path d='M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z'/></svg> Mac</span></td>
+    <td class="lang">-</td>
+    <td class="stars">10</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/OwenYou/DavinciResolveDCTL_ChromaticAdaptation">ChromaticAdaptation</a><a class="full" href="https://github.com/OwenYou/DavinciResolveDCTL_ChromaticAdaptation">https://github.com/OwenYou/DavinciResolveDCTL_ChromaticAdaptation</a></div></td>
+    <td class="desc">用 DCTL 实现色适应算法</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">9</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/toru-ver4/Luminance_Map_for_DaVinci_Resolve">Luminance_Map</a><a class="full" href="https://github.com/toru-ver4/Luminance_Map_for_DaVinci_Resolve">https://github.com/toru-ver4/Luminance_Map_for_DaVinci_Resolve</a></div></td>
+    <td class="desc">HDR 视频分析 DCTL 效果，用于学习 DCTL</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">9</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/50asa/shitsukan-diffusion-kit">shitsukan-diffusion-kit</a><a class="full" href="https://github.com/50asa/shitsukan-diffusion-kit">https://github.com/50asa/shitsukan-diffusion-kit</a></div></td>
+    <td class="desc">免费多阶光学漫射模拟（Black Pro Mist 等），需 Studio</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">9</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/wassermanproductions/hermes-davinci-resolve-plugin">hermes-davinci-resolve-plugin</a><a class="full" href="https://github.com/wassermanproductions/hermes-davinci-resolve-plugin">https://github.com/wassermanproductions/hermes-davinci-resolve-plugin</a></div></td>
+    <td class="desc">Hermes Agent 插件，Studio 实时控制与免费版数据交换</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">9</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/LudwigKienle/buckswood-post-plugins">buckswood-post-plugins</a><a class="full" href="https://github.com/LudwigKienle/buckswood-post-plugins">https://github.com/LudwigKienle/buckswood-post-plugins</a></div></td>
+    <td class="desc">免费电影级后期 OFX 插件（含实验性 Premiere/Nuke 移植）</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">8</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/stereo3d/StereoscopicSubtitlePlugin">StereoscopicSubtitlePlugin</a><a class="full" href="https://github.com/stereo3d/StereoscopicSubtitlePlugin">https://github.com/stereo3d/StereoscopicSubtitlePlugin</a></div></td>
+    <td class="desc">工作流集成插件，创建 DCDM 立体字幕</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">JavaScript</td>
+    <td class="stars">8</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/featherofawhale-crypto/qinghe-bfd-plugin">qinghe-bfd-plugin</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/featherofawhale-crypto/qinghe-bfd-plugin">https://github.com/featherofawhale-crypto/qinghe-bfd-plugin</a></div></td>
+    <td class="desc">达芬奇剪辑 QA 工具箱（清何）：检测时间线黑帧/夹帧/重复帧/空隙并自动打标记，支持素材归纳与字体收集；提供 Win EXE 与 macOS DMG 测试包</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">8</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/nikita-petrovich/OFX-QRCoder">OFX-QRCoder</a><a class="full" href="https://github.com/nikita-petrovich/OFX-QRCoder">https://github.com/nikita-petrovich/OFX-QRCoder</a></div></td>
+    <td class="desc">二维码生成 OFX 插件，适用于达芬奇等 OpenFX 宿主</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">7</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/oldandangry/Megajuicer">Megajuicer</a><a class="full" href="https://github.com/oldandangry/Megajuicer">https://github.com/oldandangry/Megajuicer</a></div></td>
+    <td class="desc">电影感分色调 DCTL，基于 OKLab 平衡与 Beer-Lambert 染料衰减</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">7</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/illusionyy/DaVinci-Resolve-OpenFX-Samples">DaVinci-Resolve-OpenFX-Samples</a><a class="full" href="https://github.com/illusionyy/DaVinci-Resolve-OpenFX-Samples">https://github.com/illusionyy/DaVinci-Resolve-OpenFX-Samples</a></div></td>
+    <td class="desc">达芬奇 18.5 Windows 版自带 OFX 插件示例（已归档）</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">7</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/BasketOfNekos/Midi-based-Animation-Iterator-For-DaVinci-Resolve">Midi-Animation-Iterator</a><a class="full" href="https://github.com/BasketOfNekos/Midi-based-Animation-Iterator-For-DaVinci-Resolve">https://github.com/BasketOfNekos/Midi-based-Animation-Iterator-For-DaVinci-Resolve</a></div></td>
+    <td class="desc">Fuse 插件，按 MIDI 音符重复动画，可同步音乐（吉他英雄效果等）</td>
+    <td><span class="tag Fusion">Fusion</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Lua</td>
+    <td class="stars">6</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/jonny9f/resolve-prores">resolve-prores</a><a class="full" href="https://github.com/jonny9f/resolve-prores">https://github.com/jonny9f/resolve-prores</a></div></td>
+    <td class="desc">非 Apple 平台通过 ffmpeg libavcodec 写入 ProRes 的插件</td>
+    <td><span class="tag Encoder">Encoder</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">6</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/nxcolor/dctl">nxcolor/dctl</a><a class="full" href="https://github.com/nxcolor/dctl">https://github.com/nxcolor/dctl</a></div></td>
+    <td class="desc">色彩偏移/色相偏移/密度 DCTL 工具</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">6</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/snowzhangy/OfxPyIOPlugin">OfxPyIOPlugin</a><a class="full" href="https://github.com/snowzhangy/OfxPyIOPlugin">https://github.com/snowzhangy/OfxPyIOPlugin</a></div></td>
+    <td class="desc">达芬奇测试的 Python OpenFX 插件</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">6</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/WheheoHu/bmd_doc">bmd_doc (scripting)</a><a class="full" href="https://github.com/WheheoHu/bmd_doc">https://github.com/WheheoHu/bmd_doc</a></div></td>
+    <td class="desc">DaVinci Resolve 脚本 API 精确参考 skill（方法签名/枚举/弃用），覆盖 v21</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">JavaScript</td>
+    <td class="stars">6</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/lightsailvr/ResolveOFX_NDIOutput">ResolveOFX_NDIOutput</a><a class="full" href="https://github.com/lightsailvr/ResolveOFX_NDIOutput">https://github.com/lightsailvr/ResolveOFX_NDIOutput</a></div></td>
+    <td class="desc">达芬奇 OFX 插件，基于 NDI SDK 实现 NDI 输出</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">5</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/cegaton/DCTLs-for-DaVinci-Resolve">DCTLs-for-DaVinci-Resolve</a><a class="full" href="https://github.com/cegaton/DCTLs-for-DaVinci-Resolve">https://github.com/cegaton/DCTLs-for-DaVinci-Resolve</a></div></td>
+    <td class="desc">达芬奇 DCTL 合集</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">5</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/chowjl/resolve-to-jianying">resolve-to-jianying</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/chowjl/resolve-to-jianying">https://github.com/chowjl/resolve-to-jianying</a></div></td>
+    <td class="desc">达芬奇当前时间线一键转剪映草稿，中文文档</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">5</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/Dschogo/ES2DR">ES2DR</a><a class="full" href="https://github.com/Dschogo/ES2DR">https://github.com/Dschogo/ES2DR</a></div></td>
+    <td class="desc">Firefox 扩展：把 Epidemic Sound 音乐一键转到达芬奇 Resolve，简化配乐流程</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">JavaScript</td>
+    <td class="stars">4</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/FlyingGoatFX/Exporoll">Exporoll</a><a class="full" href="https://github.com/FlyingGoatFX/Exporoll">https://github.com/FlyingGoatFX/Exporoll</a></div></td>
+    <td class="desc">色调映射 DCTL，为线性/HDR 画面创建柔和过渡曲线</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">3</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/jenkinsm13/resolve-mcp">resolve-mcp (jenkinsm13)</a><a class="full" href="https://github.com/jenkinsm13/resolve-mcp">https://github.com/jenkinsm13/resolve-mcp</a></div></td>
+    <td class="desc">MCP 服务器 + 13 个内置 SKILL.md 工作流技能（调色/渲染/QC/归档）+ Agent，最像“skill”</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">3</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/danieliser/davinci-resolve-mcp">davinci-resolve-mcp (danieliser)</a><a class="full" href="https://github.com/danieliser/davinci-resolve-mcp">https://github.com/danieliser/davinci-resolve-mcp</a></div></td>
+    <td class="desc">MCP 服务器，聚焦 Fusion/VFX 剪辑组装（97 工具）</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">3</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/xjackyz/halation">halation</a><a class="full" href="https://github.com/xjackyz/halation">https://github.com/xjackyz/halation</a></div></td>
+    <td class="desc">物理启发的胶片光晕（Halation）DCTL 插件</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">2</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/FlyingGoatFX/SpectraLight">SpectraLight</a><a class="full" href="https://github.com/FlyingGoatFX/SpectraLight">https://github.com/FlyingGoatFX/SpectraLight</a></div></td>
+    <td class="desc">模拟黑白胶片色彩滤镜对反差影响的 DCTL，需 Studio 19+</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">2</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/Hnqhj/DenDenMushi">DenDenMushi</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/Hnqhj/DenDenMushi">https://github.com/Hnqhj/DenDenMushi</a></div></td>
+    <td class="desc">达芬奇 Resolve 配音插件，支持声音克隆、情绪控制与字幕批量生成</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">JavaScript</td>
+    <td class="stars">2</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/ywatanabe1989/davinci-resolve-mcp">davinci-resolve-mcp (ywatanabe)</a><a class="full" href="https://github.com/ywatanabe1989/davinci-resolve-mcp">https://github.com/ywatanabe1989/davinci-resolve-mcp</a></div></td>
+    <td class="desc">MCP 服务器，自动桥接 WSL→Windows 达芬奇，明确支持 macOS / Win / WSL / Linux</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">2</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/hcllmsx/momovoicesub">momovoicesub</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/hcllmsx/momovoicesub">https://github.com/hcllmsx/momovoicesub</a></div></td>
+    <td class="desc">面向达芬奇与 Premiere 的自动配音插件，基于 Azure Speech 把字幕/文字转成配音并插入时间线</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">2</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/dragos10-boss/cam16-colorfulness-scale">cam16-colorfulness-scale</a><a class="full" href="https://github.com/dragos10-boss/cam16-colorfulness-scale">https://github.com/dragos10-boss/cam16-colorfulness-scale</a></div></td>
+    <td class="desc">基于 CAM16、保色相/亮度的饱和度控制 DCTL</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">2</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/janimatic/VapourSynth-for-Resolve">VapourSynth-for-Resolve</a><a class="full" href="https://github.com/janimatic/VapourSynth-for-Resolve">https://github.com/janimatic/VapourSynth-for-Resolve</a></div></td>
+    <td class="desc">VapourSynth OFX 插件，将开源 Python 图像处理引入达芬奇 Fusion 流程</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">1</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/rishiiipng/captionpro">captionpro</a><a class="full" href="https://github.com/rishiiipng/captionpro">https://github.com/rishiiipng/captionpro</a></div></td>
+    <td class="desc">达芬奇插件，将字幕轨道转换为动画 Fusion Text+ 片段</td>
+    <td><span class="tag Fusion">Fusion</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Lua</td>
+    <td class="stars">1</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/LoveinYuu/dvrctl">dvrctl</a><a class="full" href="https://github.com/LoveinYuu/dvrctl">https://github.com/LoveinYuu/dvrctl</a></div></td>
+    <td class="desc">Python 达芬奇控制库，封装项目管理/媒体池/时间线/渲染等模块，支持远程主机连接</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">1</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/tynidev/davinci-resolve">davinci-resolve (Lua)</a><a class="full" href="https://github.com/tynidev/davinci-resolve">https://github.com/tynidev/davinci-resolve</a></div></td>
+    <td class="desc">Lua 脚本合集，覆盖调色/合成评分/导出/剪辑/工具/视图等自动化场景，含通用 utils 库</td>
+    <td><span class="tag Script">Script</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Lua</td>
+    <td class="stars">1</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/ciqueira/opendisplaytransform-ofx">opendisplaytransform-ofx</a><a class="full" href="https://github.com/ciqueira/opendisplaytransform-ofx">https://github.com/ciqueira/opendisplaytransform-ofx</a></div></td>
+    <td class="desc">Open Display Transform 部分 look 工具的 OFX 移植（含 ODT N6）</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">1</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/mohamedmabrook/nimbus-diffusion">nimbus-diffusion</a><a class="full" href="https://github.com/mohamedmabrook/nimbus-diffusion">https://github.com/mohamedmabrook/nimbus-diffusion</a></div></td>
+    <td class="desc">免费 OFX 光学扩散插件</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">1</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/kai-ego/ego-fisheye">ego-fisheye</a><a class="full" href="https://github.com/kai-ego/ego-fisheye">https://github.com/kai-ego/ego-fisheye</a></div></td>
+    <td class="desc">原生鱼眼 OFX 插件（Windows + macOS/Metal）</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">1</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/zhanglidongeric1995/lutlayermanagerofx">lutlayermanagerofx</a><a class="full" href="https://github.com/zhanglidongeric1995/lutlayermanagerofx">https://github.com/zhanglidongeric1995/lutlayermanagerofx</a></div></td>
+    <td class="desc">达芬奇 OpenFX LUT 图层管理插件</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">1</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/nwhetsell/fuse-textify">fuse-textify</a><a class="full" href="https://github.com/nwhetsell/fuse-textify">https://github.com/nwhetsell/fuse-textify</a></div></td>
+    <td class="desc">达芬奇/Fusion 中的图像转文字 Fuse</td>
+    <td><span class="tag Fusion">Fusion</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Lua</td>
+    <td class="stars">1</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/ecsplendid/CAMO">CAMO</a><a class="full" href="https://github.com/ecsplendid/CAMO">https://github.com/ecsplendid/CAMO</a></div></td>
+    <td class="desc">程序化迷彩/纹理生成器，Web 应用+达芬奇 Fusion 插件，含 MARPAT/MultiCam 预设</td>
+    <td><span class="tag Fusion">Fusion</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">HTML</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/MDizzleZA/davinci-resolve-mcp-free">davinci-resolve-mcp-free</a><a class="full" href="https://github.com/MDizzleZA/davinci-resolve-mcp-free">https://github.com/MDizzleZA/davinci-resolve-mcp-free</a></div></td>
+    <td class="desc">免费版 MCP（hiteshK03 fork），17 分组工具 + 异步任务 + 本地 AI（转录/人声分离/抠像）</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/emircbngl/davinci-resolve-mcp-free">resolve-mcp-free (macOS)</a><a class="full" href="https://github.com/emircbngl/davinci-resolve-mcp-free">https://github.com/emircbngl/davinci-resolve-mcp-free</a></div></td>
+    <td class="desc">免费版 Claude MCP，FCPXML 导出 + Lua 片段 + macOS UI 自动化（Accessibility API 驱动 Magic Mask 等）</td>
+    <td><span class="tag AI">AI</span></td>
+    <td><span class='plat pf-mac'><svg width='12' height='12' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-1px'><path d='M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z'/></svg> Mac</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/gyom03/rife-ofx">rife-ofx</a><a class="full" href="https://github.com/gyom03/rife-ofx">https://github.com/gyom03/rife-ofx</a></div></td>
+    <td class="desc">原生 RIFE 光流补帧 OFX（NCNN+Vulkan，Windows）</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-win'><svg width='13' height='13' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-1px'><path d='M0 3.45L9.9 2.1v9.55H0V3.45zm10.95-.85L24 0v11.6H10.95V2.6zM0 12.35h9.9v9.65L0 20.6v-8.25zm10.95 0H24V24l-13.05-2.25V12.35z'/></svg> Win</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/purzbeats/comfy-router-ofx">comfy-router-ofx</a><a class="full" href="https://github.com/purzbeats/comfy-router-ofx">https://github.com/purzbeats/comfy-router-ofx</a></div></td>
+    <td class="desc">在 OFX 内生成 AI 图像（Nano Banana 2 / GPT Image / Seedance 路由）</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/blacktar/lens-debaser">lens-debaser</a><a class="full" href="https://github.com/blacktar/lens-debaser">https://github.com/blacktar/lens-debaser</a></div></td>
+    <td class="desc">电影镜头质感 OFX（Apple Silicon Metal）</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-mac'><svg width='12' height='12' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-1px'><path d='M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z'/></svg> Mac</span></td>
+    <td class="lang">Objective-C++</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/kaelalden/domewarp">domewarp</a><a class="full" href="https://github.com/kaelalden/domewarp">https://github.com/kaelalden/domewarp</a></div></td>
+    <td class="desc">全穹顶/鱼眼变形 OFX 插件</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/hayaksirehberi/maske-ofx">maske-ofx</a><a class="full" href="https://github.com/hayaksirehberi/maske-ofx">https://github.com/hayaksirehberi/maske-ofx</a></div></td>
+    <td class="desc">调色页内历史笔刷 matte painting OFX（CUDA/Metal 加速）</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/markpushrec/musevfx-ofx-plugins">musevfx-ofx-plugins</a><a class="full" href="https://github.com/markpushrec/musevfx-ofx-plugins">https://github.com/markpushrec/musevfx-ofx-plugins</a></div></td>
+    <td class="desc">God Rays + Deep Glow v02 GPU OFX（macOS Apple Silicon）</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-mac'><svg width='12' height='12' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-1px'><path d='M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z'/></svg> Mac</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/rewired/signal-cult">signal-cult</a><a class="full" href="https://github.com/rewired/signal-cult">https://github.com/rewired/signal-cult</a></div></td>
+    <td class="desc">免费故障风效果：BROKEN FM 与 CRT SIM（浏览器工具+原生 OFX）</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">JavaScript</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/spacemarty/penumbra-ofx-releases">penumbra-ofx-releases</a><a class="full" href="https://github.com/spacemarty/penumbra-ofx-releases">https://github.com/spacemarty/penumbra-ofx-releases</a></div></td>
+    <td class="desc">Penumbra Texture（Blend/Detail）OFX 效果安装包</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/dec18studios/color-theory-ofx">color-theory-ofx</a><a class="full" href="https://github.com/dec18studios/color-theory-ofx">https://github.com/dec18studios/color-theory-ofx</a></div></td>
+    <td class="desc">程序化绘制色彩视觉错觉的免费 OFX 插件</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/dec18studios/photochemist-demo">photochemist-demo</a><a class="full" href="https://github.com/dec18studios/photochemist-demo">https://github.com/dec18studios/photochemist-demo</a></div></td>
+    <td class="desc">胶片模拟 OFX 免费演示版（带水印）</td>
+    <td><span class="tag OFX">OFX</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C++</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/featherofawhale-crypto/resolve-pen-mask">resolve-pen-mask</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/featherofawhale-crypto/resolve-pen-mask">https://github.com/featherofawhale-crypto/resolve-pen-mask</a></div></td>
+    <td class="desc">开源达芬奇原生 Fusion 钢笔蒙版（MIT）</td>
+    <td><span class="tag Fusion">Fusion</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">HTML</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/featherofawhale-crypto/resolve-inner-glow">resolve-inner-glow</a> <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span><a class="full" href="https://github.com/featherofawhale-crypto/resolve-inner-glow">https://github.com/featherofawhale-crypto/resolve-inner-glow</a></div></td>
+    <td class="desc">开源达芬奇原生 Fusion 内发光插件（MIT）</td>
+    <td><span class="tag Fusion">Fusion</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Python</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/totox33610/davinci-fusion-tools">davinci-fusion-tools</a><a class="full" href="https://github.com/totox33610/davinci-fusion-tools">https://github.com/totox33610/davinci-fusion-tools</a></div></td>
+    <td class="desc">免费达芬奇 Fusion 宏 / Fuse / 工具合集</td>
+    <td><span class="tag Fusion">Fusion</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">Lua</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/aj3dvfx/dji-dlog2-to-aces-idt">dji-dlog2-to-aces-idt</a><a class="full" href="https://github.com/aj3dvfx/dji-dlog2-to-aces-idt">https://github.com/aj3dvfx/dji-dlog2-to-aces-idt</a></div></td>
+    <td class="desc">DJI D-Log2 / D-Gamut2 的 ACES 输入变换（IDT）</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">-</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/lakravana/martis-bleach-bypass">martis-bleach-bypass</a><a class="full" href="https://github.com/lakravana/martis-bleach-bypass">https://github.com/lakravana/martis-bleach-bypass</a></div></td>
+    <td class="desc">经典漂白旁路（Skip Bleach）工艺模拟 DCTL</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/lakravana/gameboy_vision_pro">gameboy_vision_pro</a><a class="full" href="https://github.com/lakravana/gameboy_vision_pro">https://github.com/lakravana/gameboy_vision_pro</a></div></td>
+    <td class="desc">复古 Game Boy 风格化 DCTL</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/lakravana/nostalgik-nes">nostalgik-nes</a><a class="full" href="https://github.com/lakravana/nostalgik-nes">https://github.com/lakravana/nostalgik-nes</a></div></td>
+    <td class="desc">NES 复古主机风格化：分辨率/色彩量化模拟 DCTL</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">0</td>
+  </tr>
+<tr>
+    <td><div class="repo"><a href="https://github.com/lakravana/tampere_chromatic_hue">tampere_chromatic_hue</a><a class="full" href="https://github.com/lakravana/tampere_chromatic_hue">https://github.com/lakravana/tampere_chromatic_hue</a></div></td>
+    <td class="desc">色相几何校正 DCTL</td>
+    <td><span class="tag DCTL">DCTL</span></td>
+    <td><span class='plat pf-both'>🖥 通用</span></td>
+    <td class="lang">C</td>
+    <td class="stars">0</td>
+  </tr>
+  </tbody>
+  </table>
+  <div class="empty" id="empty" style="display:none">没有匹配的项目</div>
+</div>
+
+<footer>
+  <div class="disclaimer">
+    <h4>免责声明</h4>
+    <p>本页所列项目由 <b>使用 AI 工具辅助整理自 GitHub 公开仓库</b>，Star 数为采集时快照，仅供检索参考，可能存在遗漏、过时或误判，<b>不代表任何背书、保证或推荐</b>。</p>
+    <p>安装、使用前请务必前往各项目<b>源仓库仔细阅读使用说明、许可证与兼容性要求</b>，并确认其适用于你的达芬奇版本（注意：多数 MCP / 脚本类工具需 Studio 版，免费版不开放脚本接口）。</p>
+    <p>动手前请<b>备份好你的工程文件与数据库</b>。</p>
+    <p>使用上述任何项目造成的<b>数据丢失、工程损坏、系统异常或其他任何问题，整理者概不负责，所有风险由使用者自行承担</b>。</p>
+  </div>
+</footer>
+
+<script>
+const DATA = [
+  // ===== AI / 工作流集成 =====
+  {repo:"auto-subs",full:"tmoroney/auto-subs",url:"https://github.com/tmoroney/auto-subs",desc:"端侧字幕生成，直连达芬奇/Premiere/AE，基于 Whisper 语音转文字",type:"AI",win:"y",lang:"TypeScript",stars:4315},
+  {repo:"davinci-resolve-mcp",full:"samuelgursky/davinci-resolve-mcp",url:"https://github.com/samuelgursky/davinci-resolve-mcp",desc:"DaVinci Resolve Studio 的 MCP 服务器集成，可用 AI 操控剪辑",type:"AI",win:"y",lang:"Python",stars:3342},
+  {repo:"StoryToolkitAI",full:"octimot/StoryToolkitAI",url:"https://github.com/octimot/StoryToolkitAI",desc:"AI 剪辑工具，可转写、理解内容并搜索素材，集成 ChatGPT 等模型",type:"AI",win:"y",lang:"Python",stars:1021},
+  {repo:"claude-code-auto-video-edit",full:"DayadaUP/claude-code-auto-video-edit",url:"https://github.com/DayadaUP/claude-code-auto-video-edit",desc:"达芬奇自动口播粗剪：Whisper 转写→智能分析剪辑点→生成时间线+SRT",type:"AI",win:"y",lang:"-",stars:121,zh:true},
+  {repo:"ai-video-editor",full:"mazsola2k/ai-video-editor",url:"https://github.com/mazsola2k/ai-video-editor",desc:"基于视觉大模型的 AI 视频剪辑端到端工作流",type:"AI",win:"y",lang:"Python",stars:65},
+  {repo:"DaVinci-Resolve-TTS",full:"2445868686/DaVinci-Resolve-TTS",url:"https://github.com/2445868686/DaVinci-Resolve-TTS",desc:"达芬奇 TTS 语音合成插件，支持 Azure / MiniMax / OpenAI",type:"AI",win:"y",lang:"Python",stars:18,zh:true},
+  {repo:"HushCut",full:"oliwoli/HushCut",url:"https://github.com/oliwoli/HushCut",desc:"达芬奇插件，波形可视化辅助剪辑",type:"AI",win:"y",lang:"TypeScript",stars:19},
+  {repo:"PluginLibrary-Resolve",full:"Akascape/PluginLibrary-Resolve",url:"https://github.com/Akascape/PluginLibrary-Resolve",desc:"Akascape 插件库——一个应用管理其所有达芬奇插件",type:"AI",win:"y",lang:"HTML",stars:11},
+
+  // ===== OFX / OpenFX 原生插件 =====
+  {repo:"CorridorKey-Runtime",full:"alexandremendoncaalvaro/CorridorKey-Runtime",url:"https://github.com/alexandremendoncaalvaro/CorridorKey-Runtime",desc:"原生 AI 抠像运行时与 OFX 插件，与 Corridor Digital 合作开发，支持 NVIDIA RTX",type:"OFX",win:"y",lang:"C++",stars:755,platform:"win"},
+  {repo:"BaldavengerPlugins",full:"baldavenger/BaldavengerPlugins",url:"https://github.com/baldavenger/BaldavengerPlugins",desc:"达芬奇 OFX 插件集，明确支持 macOS / Win10 / Linux",type:"OFX",win:"y",lang:"-",stars:147},
+  {repo:"purzos-ofx",full:"purzbeats/purzos-ofx",url:"https://github.com/purzbeats/purzos-ofx",desc:"原生 OpenFX 复古/模拟/故障/CRT-VHS 视频特效插件",type:"OFX",win:"p",lang:"C++",stars:29},
+  {repo:"corridorkey_ofx",full:"gitcapoom/corridorkey_ofx",url:"https://github.com/gitcapoom/corridorkey_ofx",desc:"将 CorridorKey AI 绿幕抠像器引入达芬奇 20 的 OFX 插件",type:"OFX",win:"p",lang:"C++",stars:22,platform:"win"},
+  {repo:"zzzFX",full:"zzzEffects/zzzFX",url:"https://github.com/zzzEffects/zzzFX",desc:"开源免费视频特效插件系列，支持 AE/Premiere 及 OFX 宿主（达芬奇/VEGAS）",type:"OFX",win:"p",lang:"Rust",stars:15},
+  {repo:"boilify",full:"Microck/boilify",url:"https://github.com/Microck/boilify",desc:"热浪扭曲/沸腾特效 OFX 插件",type:"OFX",win:"p",lang:"C++",stars:10},
+  {repo:"buckswood-post-plugins",full:"LudwigKienle/buckswood-post-plugins",url:"https://github.com/LudwigKienle/buckswood-post-plugins",desc:"免费电影级后期 OFX 插件（含实验性 Premiere/Nuke 移植）",type:"OFX",win:"p",lang:"C++",stars:8},
+  {repo:"lenscorrect-ofx",full:"murtazatunio/lenscorrect-ofx",url:"https://github.com/murtazatunio/lenscorrect-ofx",desc:"镜头校正 OFX 插件，便于 RAW 编辑流程，含暗角校正",type:"OFX",win:"p",lang:"C++",stars:10},
+  {repo:"OFX-QRCoder",full:"nikita-petrovich/OFX-QRCoder",url:"https://github.com/nikita-petrovich/OFX-QRCoder",desc:"二维码生成 OFX 插件，适用于达芬奇等 OpenFX 宿主",type:"OFX",win:"p",lang:"C++",stars:7},
+  {repo:"ResolveOFX_NDIOutput",full:"lightsailvr/ResolveOFX_NDIOutput",url:"https://github.com/lightsailvr/ResolveOFX_NDIOutput",desc:"达芬奇 OFX 插件，基于 NDI SDK 实现 NDI 输出",type:"OFX",win:"p",lang:"C++",stars:5},
+  {repo:"VapourSynth-for-Resolve",full:"janimatic/VapourSynth-for-Resolve",url:"https://github.com/janimatic/VapourSynth-for-Resolve",desc:"VapourSynth OFX 插件，将开源 Python 图像处理引入达芬奇 Fusion 流程",type:"OFX",win:"p",lang:"-",stars:1},
+
+  // ===== Fusion 插件 / Fuse =====
+  {repo:"Rembg-Fuse",full:"Akascape/Rembg-Fuse",url:"https://github.com/Akascape/Rembg-Fuse",desc:"免费开源 AI 插件，在达芬奇 Fusion 中自动抠图去背景",type:"Fusion",win:"y",lang:"Python",stars:221},
+  {repo:"FuAlign",full:"brunocbreis/FuAlign",url:"https://github.com/brunocbreis/FuAlign",desc:"为达芬奇 Fusion 添加对齐与分布功能的插件",type:"Fusion",win:"y",lang:"Python",stars:34},
+  {repo:"RemObj-Fuse",full:"Akascape/RemObj-Fuse",url:"https://github.com/Akascape/RemObj-Fuse",desc:"免费开源 AI 插件，用 LaMa ONNX 模型在 Fusion 中自动移除物体",type:"Fusion",win:"y",lang:"Python",stars:20},
+  {repo:"Midi-Animation-Iterator",full:"BasketOfNekos/Midi-based-Animation-Iterator-For-DaVinci-Resolve",url:"https://github.com/BasketOfNekos/Midi-based-Animation-Iterator-For-DaVinci-Resolve",desc:"Fuse 插件，按 MIDI 音符重复动画，可同步音乐（吉他英雄效果等）",type:"Fusion",win:"y",lang:"Lua",stars:6},
+  {repo:"captionpro",full:"rishiiipng/captionpro",url:"https://github.com/rishiiipng/captionpro",desc:"达芬奇插件，将字幕轨道转换为动画 Fusion Text+ 片段",type:"Fusion",win:"y",lang:"Lua",stars:1},
+  {repo:"CAMO",full:"ecsplendid/CAMO",url:"https://github.com/ecsplendid/CAMO",desc:"程序化迷彩/纹理生成器，Web 应用+达芬奇 Fusion 插件，含 MARPAT/MultiCam 预设",type:"Fusion",win:"y",lang:"HTML",stars:0},
+
+  // ===== 编码器插件（仅 Windows 可用） =====
+  {repo:"ffmpeg_encoder_plugin",full:"EdvinNilsson/ffmpeg_encoder_plugin",url:"https://github.com/EdvinNilsson/ffmpeg_encoder_plugin",desc:"FFmpeg 编码器插件，支持 H264/H265/AV1，跨平台含 Windows",type:"Encoder",win:"y",lang:"C++",stars:241},
+  {repo:"prores_encoder",full:"gdaswani/prores_encoder",url:"https://github.com/gdaswani/prores_encoder",desc:"ProRes 导出插件，后端基于 FFmpeg",type:"Encoder",win:"y",lang:"C++",stars:14},
+  {repo:"x264_encoder",full:"gdaswani/x264_encoder",url:"https://github.com/gdaswani/x264_encoder",desc:"基于 Blackmagic 官方示例修改的 x264 编码器插件",type:"Encoder",win:"y",lang:"C++",stars:13},
+  {repo:"resolve-prores",full:"jonny9f/resolve-prores",url:"https://github.com/jonny9f/resolve-prores",desc:"非 Apple 平台通过 ffmpeg libavcodec 写入 ProRes 的插件",type:"Encoder",win:"y",lang:"C++",stars:6},
+
+  // ===== DCTL 色彩变换脚本（跨平台通用） =====
+  {repo:"DCTLs",full:"baldavenger/DCTLs",url:"https://github.com/baldavenger/DCTLs",desc:"达芬奇 CTL 色彩变换脚本库，知名老牌项目",type:"DCTL",win:"y",lang:"C",stars:360},
+  {repo:"resolve-dctl",full:"xtremestuff/resolve-dctl",url:"https://github.com/xtremestuff/resolve-dctl",desc:"达芬奇 DCTL 库",type:"DCTL",win:"y",lang:"-",stars:164},
+  {repo:"DCTLs (Demystify)",full:"Demystify-Color/DCTLs",url:"https://github.com/Demystify-Color/DCTLs",desc:"Nico Fink 编写的免费 DCTL，配套教程 demystify-color.com",type:"DCTL",win:"y",lang:"-",stars:163},
+  {repo:"NamiColor",full:"Wavechaser/NamiColor",url:"https://github.com/Wavechaser/NamiColor",desc:"DCTL 脚本，高效线性化胶片扫描并启用场景参考工作流",type:"DCTL",win:"y",lang:"C",stars:121},
+  {repo:"ACES_DCTL",full:"baldavenger/ACES_DCTL",url:"https://github.com/baldavenger/ACES_DCTL",desc:"ACES v1.3 DCTLs（需达芬奇 Studio）",type:"DCTL",win:"y",lang:"C",stars:73},
+  {repo:"Shaderfuse",full:"nmbr73/Shaderfuse",url:"https://github.com/nmbr73/Shaderfuse",desc:"将 Shadertoy WebGL 着色器转为 DCTL Fuse，明确支持 Windows+NVIDIA",type:"DCTL",win:"y",lang:"Lua",stars:80},
+  {repo:"photographic-dctls",full:"mikaelsundell/photographic-dctls",url:"https://github.com/mikaelsundell/photographic-dctls",desc:"色彩科学数学实验 DCTL，含 LogC/ACES AP0/Cineon 等",type:"DCTL",win:"y",lang:"C",stars:79},
+  {repo:"MoazElgabry DCTLs",full:"MoazElgabry/DCTLs",url:"https://github.com/MoazElgabry/DCTLs",desc:"Moaz Elgabry 的达芬奇 DCTL 合集",type:"DCTL",win:"y",lang:"C",stars:68},
+  {repo:"open-display-transform",full:"jedypod/open-display-transform",url:"https://github.com/jedypod/open-display-transform",desc:"宽色域场景线性数据渲染为 SDR/HDR 显示的工具集（DCTL/Blink）",type:"DCTL",win:"y",lang:"C",stars:525},
+  {repo:"protune-transforms",full:"xtremestuff/protune-transforms",url:"https://github.com/xtremestuff/protune-transforms",desc:"GoPro GP-Log2/GP-Log/Protune 的 ACES IDT 与 YRGB 变换",type:"DCTL",win:"y",lang:"Shell",stars:179},
+  {repo:"DaVinci-Resolve-DCTLs",full:"KaurHendrikson/DaVinci-Resolve-DCTLs",url:"https://github.com/KaurHendrikson/DaVinci-Resolve-DCTLs",desc:"达芬奇 DCTL 合集",type:"DCTL",win:"y",lang:"-",stars:38},
+  {repo:"DCTL (caryknoop)",full:"caryknoop/DCTL",url:"https://github.com/caryknoop/DCTL",desc:"达芬奇 DCTL 文件集",type:"DCTL",win:"y",lang:"-",stars:31},
+  {repo:"DCTLS",full:"jai-panjwani/DCTLS",url:"https://github.com/jai-panjwani/DCTLS",desc:"达芬奇 DCTL 脚本",type:"DCTL",win:"y",lang:"-",stars:23},
+  {repo:"resolve_DCTLs",full:"mitkunz/resolve_DCTLs",url:"https://github.com/mitkunz/resolve_DCTLs",desc:"面向日常调色任务的自制 DCTL 合集",type:"DCTL",win:"y",lang:"-",stars:22},
+  {repo:"Faded-Balancer-DCTL",full:"fabiocolor/Faded-Balancer-DCTL",url:"https://github.com/fabiocolor/Faded-Balancer-DCTL",desc:"重新平衡褪色胶片扫描的 DCTL，从 Releases 下载 .dctl",type:"DCTL",win:"y",lang:"Python",stars:22},
+  {repo:"RenderHub-DCTLs",full:"Senthil360/RenderHub-DCTLs",url:"https://github.com/Senthil360/RenderHub-DCTLs",desc:"达芬奇 Studio 的 DCTL 合集",type:"DCTL",win:"y",lang:"Shell",stars:26},
+  {repo:"dctl-utils",full:"ra100/dctl-utils",url:"https://github.com/ra100/dctl-utils",desc:"小型达芬奇 DCTL 工具集",type:"DCTL",win:"y",lang:"-",stars:19},
+  {repo:"free-DCTL",full:"bobtronic73/free-DCTL",url:"https://github.com/bobtronic73/free-DCTL",desc:"DCTL 文件合集，多为达芬奇小工具",type:"DCTL",win:"y",lang:"C",stars:19},
+  {repo:"HK-Estimation",full:"OwenYou/DavinciResolveDCTL_HKEstimation",url:"https://github.com/OwenYou/DavinciResolveDCTL_HKEstimation",desc:"Helmholtz-Kohlrausch 效应估算与补偿，含 4 种方法",type:"DCTL",win:"y",lang:"-",stars:14},
+  {repo:"RemoveColorMask",full:"OwenYou/DavinciResolveDCTL_RemoveColorMask",url:"https://github.com/OwenYou/DavinciResolveDCTL_RemoveColorMask",desc:"交互式 DCTL，可移除胶片色彩蒙版",type:"DCTL",win:"y",lang:"-",stars:12},
+  {repo:"rodrigomas DCTLs",full:"rodrigomas/DCTLs",url:"https://github.com/rodrigomas/DCTLs",desc:"达芬奇 CTL 脚本",type:"DCTL",win:"y",lang:"-",stars:12},
+  {repo:"ChromaticAdaptation",full:"OwenYou/DavinciResolveDCTL_ChromaticAdaptation",url:"https://github.com/OwenYou/DavinciResolveDCTL_ChromaticAdaptation",desc:"用 DCTL 实现色适应算法",type:"DCTL",win:"y",lang:"-",stars:9},
+  {repo:"Luminance_Map",full:"toru-ver4/Luminance_Map_for_DaVinci_Resolve",url:"https://github.com/toru-ver4/Luminance_Map_for_DaVinci_Resolve",desc:"HDR 视频分析 DCTL 效果，用于学习 DCTL",type:"DCTL",win:"y",lang:"C",stars:9},
+  {repo:"nxcolor/dctl",full:"nxcolor/dctl",url:"https://github.com/nxcolor/dctl",desc:"色彩偏移/色相偏移/密度 DCTL 工具",type:"DCTL",win:"y",lang:"-",stars:6},
+  {repo:"Megajuicer",full:"oldandangry/Megajuicer",url:"https://github.com/oldandangry/Megajuicer",desc:"电影感分色调 DCTL，基于 OKLab 平衡与 Beer-Lambert 染料衰减",type:"DCTL",win:"y",lang:"-",stars:7},
+  {repo:"DCTLs-for-DaVinci-Resolve",full:"cegaton/DCTLs-for-DaVinci-Resolve",url:"https://github.com/cegaton/DCTLs-for-DaVinci-Resolve",desc:"达芬奇 DCTL 合集",type:"DCTL",win:"y",lang:"-",stars:5},
+  {repo:"shitsukan-diffusion-kit",full:"50asa/shitsukan-diffusion-kit",url:"https://github.com/50asa/shitsukan-diffusion-kit",desc:"免费多阶光学漫射模拟（Black Pro Mist 等），需 Studio",type:"DCTL",win:"y",lang:"-",stars:9},
+  {repo:"halation",full:"xjackyz/halation",url:"https://github.com/xjackyz/halation",desc:"物理启发的胶片光晕（Halation）DCTL 插件",type:"DCTL",win:"y",lang:"-",stars:2},
+  {repo:"SpectraLight",full:"FlyingGoatFX/SpectraLight",url:"https://github.com/FlyingGoatFX/SpectraLight",desc:"模拟黑白胶片色彩滤镜对反差影响的 DCTL，需 Studio 19+",type:"DCTL",win:"y",lang:"-",stars:2},
+  {repo:"Exporoll",full:"FlyingGoatFX/Exporoll",url:"https://github.com/FlyingGoatFX/Exporoll",desc:"色调映射 DCTL，为线性/HDR 画面创建柔和过渡曲线",type:"DCTL",win:"y",lang:"-",stars:3},
+
+  // ===== 脚本 / 工作流工具 =====
+  {repo:"pydavinci",full:"pedrolabonia/pydavinci",url:"https://github.com/pedrolabonia/pydavinci",desc:"帮助脚本化控制达芬奇的 Python 包",type:"Script",win:"y",lang:"Python",stars:181},
+  {repo:"DaVinciResolveScript",full:"fukco/DaVinciResolveScript",url:"https://github.com/fukco/DaVinciResolveScript",desc:"元数据解析与自定义规则调色工具，2026年4月推出创意集 Creative Resolve",type:"Script",win:"y",lang:"Lua",stars:57,zh:true},
+  {repo:"davinci-resolve-cli",full:"Poechant/davinci-resolve-cli",url:"https://github.com/Poechant/davinci-resolve-cli",desc:"达芬奇 18+ 命令行工具，控制项目/媒体/渲染/时间线，支持 AI 代理",type:"Script",win:"y",lang:"Python",stars:52},
+  {repo:"proxima",full:"in03/proxima",url:"https://github.com/in03/proxima",desc:"从达芬奇直接转码源媒体，多机并行编码快速生成代理",type:"Script",win:"y",lang:"Python",stars:74},
+  {repo:"DaVinciResolve-metadata",full:"deric/DaVinciResolve-metadata",url:"https://github.com/deric/DaVinciResolve-metadata",desc:"EXIF 元数据同步工具",type:"Script",win:"y",lang:"Lua",stars:70},
+  {repo:"Toolbox",full:"VilleOlof/Toolbox",url:"https://github.com/VilleOlof/Toolbox",desc:"加速达芬奇工作流的模块化工具箱（已归档）",type:"Script",win:"y",lang:"Svelte",stars:61},
+  {repo:"awesome-davinci-resolve",full:"Greenysmac/awesome-davinci-resolve",url:"https://github.com/Greenysmac/awesome-davinci-resolve",desc:"社区精选的达芬奇插件/工具/资源列表（r/colorists 维护）",type:"Script",win:"y",lang:"-",stars:333},
+  {repo:"awesome-davinci-resolve (pham)",full:"cutbypham/awesome-davinci-resolve",url:"https://github.com/cutbypham/awesome-davinci-resolve",desc:"达芬奇相关资源精选列表",type:"Script",win:"y",lang:"Lua",stars:66},
+  {repo:"resolve-otio",full:"eric-with-a-c/resolve-otio",url:"https://github.com/eric-with-a-c/resolve-otio",desc:"达芬奇 OpenTimelineIO 插件",type:"Script",win:"y",lang:"Python",stars:27},
+  {repo:"filmeon",full:"helios1138/filmeon",url:"https://github.com/helios1138/filmeon",desc:"物理化、色彩管理的 HDR 胶片负片反转模型",type:"Script",win:"y",lang:"-",stars:29},
+  {repo:"deadline-davinci-resolve",full:"Puppetworks-Animation-Studio/deadline-davinci-resolve",url:"https://github.com/Puppetworks-Animation-Studio/deadline-davinci-resolve",desc:"Thinkbox Deadline 渲染农场管理达芬奇插件",type:"Script",win:"y",lang:"Python",stars:38},
+  {repo:"StereoscopicSubtitlePlugin",full:"stereo3d/StereoscopicSubtitlePlugin",url:"https://github.com/stereo3d/StereoscopicSubtitlePlugin",desc:"工作流集成插件，创建 DCDM 立体字幕",type:"Script",win:"y",lang:"JavaScript",stars:8},
+  {repo:"openfx-template",full:"gingray/openfx-template",url:"https://github.com/gingray/openfx-template",desc:"达芬奇 OFX 插件开发引导模板",type:"Script",win:"y",lang:"C++",stars:16},
+  {repo:"DaVinci-Resolve-OpenFX-Samples",full:"illusionyy/DaVinci-Resolve-OpenFX-Samples",url:"https://github.com/illusionyy/DaVinci-Resolve-OpenFX-Samples",desc:"达芬奇 18.5 Windows 版自带 OFX 插件示例（已归档）",type:"Script",win:"y",lang:"C++",stars:7},
+  {repo:"OfxPyIOPlugin",full:"snowzhangy/OfxPyIOPlugin",url:"https://github.com/snowzhangy/OfxPyIOPlugin",desc:"达芬奇测试的 Python OpenFX 插件",type:"Script",win:"y",lang:"C++",stars:6},
+  {repo:"ResolveRPC",full:"jacobbvfx/ResolveRPC",url:"https://github.com/jacobbvfx/ResolveRPC",desc:"Java 编写的达芬奇简单 RPC 客户端（含 Discord 状态展示）",type:"Script",win:"y",lang:"Java",stars:50},
+  {repo:"hermes-davinci-resolve-plugin",full:"wassermanproductions/hermes-davinci-resolve-plugin",url:"https://github.com/wassermanproductions/hermes-davinci-resolve-plugin",desc:"Hermes Agent 插件，Studio 实时控制与免费版数据交换",type:"Script",win:"y",lang:"Python",stars:9},
+
+  // ===== 中文版插件（中文开发者 / 中文文档 / 中文界面） =====
+  {repo:"haoone-app",full:"minghe36/haoone-app",url:"https://github.com/minghe36/haoone-app",desc:"AI专业字幕软件，含达芬奇字幕插件，中英转录识别96%+，支持说话人识别、智能拆行、AI校正、双语字幕",type:"AI",win:"y",lang:"MDX",stars:329,zh:true},
+  {repo:"viccovlog-davinci-materials",full:"viccowang/viccovlog-davinci-materials",url:"https://github.com/viccowang/viccovlog-davinci-materials",desc:"达芬奇 Resolve 中文入门教程素材包，适合初学者跟练",type:"Script",win:"y",lang:"RTF",stars:231,zh:true},
+  {repo:"vinci-subtitle-man",full:"minghe36/vinci-subtitle-man",url:"https://github.com/minghe36/vinci-subtitle-man",desc:"达芬奇剪辑软件 AI 自动生成字幕插件（Lua），中文界面",type:"AI",win:"y",lang:"Lua",stars:73,zh:true},
+  {repo:"resolve-to-jianying",full:"chowjl/resolve-to-jianying",url:"https://github.com/chowjl/resolve-to-jianying",desc:"达芬奇当前时间线一键转剪映草稿，中文文档",type:"Script",win:"y",lang:"Python",stars:5,zh:true},
+  {repo:"DenDenMushi",full:"Hnqhj/DenDenMushi",url:"https://github.com/Hnqhj/DenDenMushi",desc:"达芬奇 Resolve 配音插件，支持声音克隆、情绪控制与字幕批量生成",type:"AI",win:"y",lang:"JavaScript",stars:2,zh:true},
+
+  // ===== Mac 端 / 跨平台 MCP & 工作流技能（2026-08-17 新增） =====
+  {repo:"resolve-mcp (apvlv)",full:"apvlv/davinci-resolve-mcp",url:"https://github.com/apvlv/davinci-resolve-mcp",desc:"MCP 服务器，对接 DaVinci Resolve 与 Fusion，达芬奇 20/21 全 API 覆盖（76+ 工具、20 资源）",type:"AI",win:"y",lang:"Python",stars:78},
+  {repo:"davinci-resolve-mcp (ywatanabe)",full:"ywatanabe1989/davinci-resolve-mcp",url:"https://github.com/ywatanabe1989/davinci-resolve-mcp",desc:"MCP 服务器，自动桥接 WSL→Windows 达芬奇，明确支持 macOS / Win / WSL / Linux",type:"AI",win:"y",lang:"Python",stars:2},
+  {repo:"resolve-mcp (jenkinsm13)",full:"jenkinsm13/resolve-mcp",url:"https://github.com/jenkinsm13/resolve-mcp",desc:"MCP 服务器 + 13 个内置 SKILL.md 工作流技能（调色/渲染/QC/归档）+ Agent，最像“skill”",type:"AI",win:"y",lang:"Python",stars:3},
+  {repo:"davinci-resolve-mcp (danieliser)",full:"danieliser/davinci-resolve-mcp",url:"https://github.com/danieliser/davinci-resolve-mcp",desc:"MCP 服务器，聚焦 Fusion/VFX 剪辑组装（97 工具）",type:"AI",win:"y",lang:"Python",stars:3},
+  {repo:"resolve-ai-toolkit",full:"allwavemedia/resolve-ai-toolkit",url:"https://github.com/allwavemedia/resolve-ai-toolkit",desc:"AI 驱动的 MCP 工具包，21 个工具覆盖 Fusion/VFX、剪辑、音频、调色（macOS 优先）",type:"AI",win:"n",lang:"-",stars:10,platform:"mac"},
+  {repo:"bmd_doc (scripting)",full:"WheheoHu/bmd_doc",url:"https://github.com/WheheoHu/bmd_doc",desc:"DaVinci Resolve 脚本 API 精确参考 skill（方法签名/枚举/弃用），覆盖 v21",type:"Script",win:"y",lang:"JavaScript",stars:6},
+  {repo:"davinci-resolve-mcp (Free)",full:"hiteshK03/davinci-resolve-mcp",url:"https://github.com/hiteshK03/davinci-resolve-mcp",desc:"唯一支持达芬奇免费版的 MCP 桥接，162 工具（155/162 免费可用），内置本地 AI（Demucs 人声分离 / rembg 抠像 / Whisper 转录）",type:"AI",win:"y",lang:"Python",stars:116},
+  {repo:"dvrctl",full:"LoveinYuu/dvrctl",url:"https://github.com/LoveinYuu/dvrctl",desc:"Python 达芬奇控制库，封装项目管理/媒体池/时间线/渲染等模块，支持远程主机连接",type:"Script",win:"y",lang:"Python",stars:1},
+  {repo:"davinci-resolve (Lua)",full:"tynidev/davinci-resolve",url:"https://github.com/tynidev/davinci-resolve",desc:"Lua 脚本合集，覆盖调色/合成评分/导出/剪辑/工具/视图等自动化场景，含通用 utils 库",type:"Script",win:"y",lang:"Lua",stars:1},
+  {repo:"davinci-resolve-mcp-free",full:"MDizzleZA/davinci-resolve-mcp-free",url:"https://github.com/MDizzleZA/davinci-resolve-mcp-free",desc:"免费版 MCP（hiteshK03 fork），17 分组工具 + 异步任务 + 本地 AI（转录/人声分离/抠像）",type:"AI",win:"y",lang:"Python",stars:0},
+  {repo:"resolve-mcp-free (macOS)",full:"emircbngl/davinci-resolve-mcp-free",url:"https://github.com/emircbngl/davinci-resolve-mcp-free",desc:"免费版 Claude MCP，FCPXML 导出 + Lua 片段 + macOS UI 自动化（Accessibility API 驱动 Magic Mask 等）",type:"AI",win:"n",lang:"Python",stars:0,platform:"mac"},
+
+  // ===== 2026-08-19 新增：剪辑 QA / 专业 MCP / 工具链 =====
+  {repo:"qinghe-bfd-plugin",full:"featherofawhale-crypto/qinghe-bfd-plugin",url:"https://github.com/featherofawhale-crypto/qinghe-bfd-plugin",desc:"达芬奇剪辑 QA 工具箱（清何）：检测时间线黑帧/夹帧/重复帧/空隙并自动打标记，支持素材归纳与字体收集；提供 Win EXE 与 macOS DMG 测试包",type:"Script",win:"y",lang:"Python",stars:8,zh:true},
+  {repo:"davinci-mcp-professional",full:"hoyt-harness/davinci-mcp-professional",url:"https://github.com/hoyt-harness/davinci-mcp-professional",desc:"企业级 MCP 服务器，把达芬奇 Studio 全功能暴露给 AI Agent（Claude/ChatGPT/Gemini 等），支持 Linux/Windows/Mac",type:"AI",win:"y",lang:"Python",stars:25},
+  {repo:"dvr",full:"mhadifilms/dvr",url:"https://github.com/mhadifilms/dvr",desc:"达芬奇 Resolve CLI + Python 库 + MCP 服务器，声明式规格与结构化 JSON 输出，自动化剪辑/调色/渲染",type:"AI",win:"y",lang:"Python",stars:14},
+  {repo:"Davinci-Resolve-Functions-Toolkit",full:"FusionPixelStudio/Davinci-Resolve-Functions-Toolkit",url:"https://github.com/FusionPixelStudio/Davinci-Resolve-Functions-Toolkit",desc:"VSCode 扩展：达芬奇脚本片段、自动化与开发辅助，提升 Resolve Scripting 效率",type:"Script",win:"y",lang:"TypeScript",stars:11},
+  {repo:"davinci-resolve-ai-bridge-mcp",full:"flamexnreal/davinci-resolve-ai-bridge-mcp",url:"https://github.com/flamexnreal/davinci-resolve-ai-bridge-mcp",desc:"本地 MCP 桥，让 Claude/Codex/Cursor 直接读写达芬奇当前工程（含免费版），无需复制粘贴",type:"AI",win:"y",lang:"-",stars:26},
+  {repo:"ES2DR",full:"Dschogo/ES2DR",url:"https://github.com/Dschogo/ES2DR",desc:"Firefox 扩展：把 Epidemic Sound 音乐一键转到达芬奇 Resolve，简化配乐流程",type:"Script",win:"y",lang:"JavaScript",stars:4},
+  {repo:"momovoicesub",full:"hcllmsx/momovoicesub",url:"https://github.com/hcllmsx/momovoicesub",desc:"面向达芬奇与 Premiere 的自动配音插件，基于 Azure Speech 把字幕/文字转成配音并插入时间线",type:"AI",win:"y",lang:"Python",stars:2,zh:true}
+  // ===== 2026-10-05 第二轮增补（GitHub 全量检索）：新插件与补漏 =====
+  {repo:"davinci-autoedit-agent",full:"liuluhaixiu/davinci-autoedit-agent",url:"https://github.com/liuluhaixiu/davinci-autoedit-agent",desc:"基于 MCP 的全自动剪辑 Agent（Codex 技能集）：素材分析→脚本撰写→TTS→自动搭建达芬奇时间线，需 Studio 18.5+",type:"AI",win:"y",lang:"Python",stars:479,zh:true},
+  {repo:"resolve-claude-mcp",full:"barckley75/resolve-claude-mcp",url:"https://github.com/barckley75/resolve-claude-mcp",desc:"将达芬奇 Studio 接入 Claude 的 MCP 服务器，读写双向",type:"AI",win:"y",lang:"Python",stars:374},
+  {repo:"unofficial-davinci-mcp",full:"wassermanproductions/unofficial-davinci-mcp",url:"https://github.com/wassermanproductions/unofficial-davinci-mcp",desc:"让任意 AI Agent 操控达芬奇：Studio 实时控制，免费版走 FCPXML/LUT 工作流",type:"AI",win:"y",lang:"Python",stars:36},
+  {repo:"claude-resolve",full:"olegkupshukov/claude-resolve",url:"https://github.com/olegkupshukov/claude-resolve",desc:"AI 动态图形生成与达芬奇助手（Studio）",type:"AI",win:"y",lang:"JavaScript",stars:18},
+  {repo:"color-grade-ai",full:"isaacrowntree/color-grade-ai",url:"https://github.com/isaacrowntree/color-grade-ai",desc:"AI 生成 .cube 调色 LUT 的 Claude Code 技能，支持达芬奇/Premiere",type:"AI",win:"y",lang:"Python",stars:23},
+  {repo:"davinci-resolve-claude-skills",full:"chaiwithjai/davinci-resolve-claude-skills",url:"https://github.com/chaiwithjai/davinci-resolve-claude-skills",desc:"面向内容创作者与开发者的达芬奇 Claude Code 技能集",type:"AI",win:"y",lang:"Python",stars:23},
+  {repo:"autocut",full:"cobanov/autocut",url:"https://github.com/cobanov/autocut",desc:"去静音自动剪辑桌面工具（Rust+Tauri），导出达芬奇友好 FCPXML",type:"AI",win:"y",lang:"Rust",stars:65},
+  {repo:"resolve-dlss5",full:"saog0721/davinci-resolve-dlss5",url:"https://github.com/saog0721/davinci-resolve-dlss5",desc:"实验性 DLSS 神经渲染降噪 OFX：NVIDIA RTX 40/50 专用，Resolve 20.0.1+，最多三级降噪",type:"OFX",win:"y",lang:"C++",stars:94,platform:"win"},
+  {repo:"opendrt-ofx",full:"moazelgabry/me_opendrt-ofx",url:"https://github.com/moazelgabry/me_opendrt-ofx",desc:"Jed Smith 的 OpenDRT 显示变换 OFX 移植",type:"OFX",win:"p",lang:"C++",stars:14},
+  {repo:"baldavengerofx-macosarm64",full:"demystify-color/dmc-baldavengerofx-macosarm64",url:"https://github.com/demystify-color/dmc-baldavengerofx-macosarm64",desc:"BaldavengerOFX 的 Apple Silicon（M 系列）移植版",type:"OFX",win:"n",lang:"C++",stars:13,platform:"mac"},
+  {repo:"rife-ofx",full:"gyom03/rife-ofx",url:"https://github.com/gyom03/rife-ofx",desc:"原生 RIFE 光流补帧 OFX（NCNN+Vulkan，Windows）",type:"OFX",win:"y",lang:"C++",stars:0,platform:"win"},
+  {repo:"comfy-router-ofx",full:"purzbeats/comfy-router-ofx",url:"https://github.com/purzbeats/comfy-router-ofx",desc:"在 OFX 内生成 AI 图像（Nano Banana 2 / GPT Image / Seedance 路由）",type:"OFX",win:"p",lang:"C++",stars:0},
+  {repo:"opendisplaytransform-ofx",full:"ciqueira/opendisplaytransform-ofx",url:"https://github.com/ciqueira/opendisplaytransform-ofx",desc:"Open Display Transform 部分 look 工具的 OFX 移植（含 ODT N6）",type:"OFX",win:"p",lang:"C++",stars:1},
+  {repo:"lens-debaser",full:"blacktar/lens-debaser",url:"https://github.com/blacktar/lens-debaser",desc:"电影镜头质感 OFX（Apple Silicon Metal）",type:"OFX",win:"n",lang:"Objective-C++",stars:0,platform:"mac"},
+  {repo:"domewarp",full:"kaelalden/domewarp",url:"https://github.com/kaelalden/domewarp",desc:"全穹顶/鱼眼变形 OFX 插件",type:"OFX",win:"p",lang:"C++",stars:0},
+  {repo:"maske-ofx",full:"hayaksirehberi/maske-ofx",url:"https://github.com/hayaksirehberi/maske-ofx",desc:"调色页内历史笔刷 matte painting OFX（CUDA/Metal 加速）",type:"OFX",win:"p",lang:"C++",stars:0},
+  {repo:"musevfx-ofx-plugins",full:"markpushrec/musevfx-ofx-plugins",url:"https://github.com/markpushrec/musevfx-ofx-plugins",desc:"God Rays + Deep Glow v02 GPU OFX（macOS Apple Silicon）",type:"OFX",win:"n",lang:"C++",stars:0,platform:"mac"},
+  {repo:"signal-cult",full:"rewired/signal-cult",url:"https://github.com/rewired/signal-cult",desc:"免费故障风效果：BROKEN FM 与 CRT SIM（浏览器工具+原生 OFX）",type:"OFX",win:"p",lang:"JavaScript",stars:0},
+  {repo:"penumbra-ofx-releases",full:"spacemarty/penumbra-ofx-releases",url:"https://github.com/spacemarty/penumbra-ofx-releases",desc:"Penumbra Texture（Blend/Detail）OFX 效果安装包",type:"OFX",win:"p",lang:"-",stars:0},
+  {repo:"color-theory-ofx",full:"dec18studios/color-theory-ofx",url:"https://github.com/dec18studios/color-theory-ofx",desc:"程序化绘制色彩视觉错觉的免费 OFX 插件",type:"OFX",win:"p",lang:"C++",stars:0},
+  {repo:"photochemist-demo",full:"dec18studios/photochemist-demo",url:"https://github.com/dec18studios/photochemist-demo",desc:"胶片模拟 OFX 免费演示版（带水印）",type:"OFX",win:"p",lang:"C++",stars:0},
+  {repo:"nimbus-diffusion",full:"mohamedmabrook/nimbus-diffusion",url:"https://github.com/mohamedmabrook/nimbus-diffusion",desc:"免费 OFX 光学扩散插件",type:"OFX",win:"p",lang:"C++",stars:1},
+  {repo:"ego-fisheye",full:"kai-ego/ego-fisheye",url:"https://github.com/kai-ego/ego-fisheye",desc:"原生鱼眼 OFX 插件（Windows + macOS/Metal）",type:"OFX",win:"p",lang:"C++",stars:1},
+  {repo:"lutlayermanagerofx",full:"zhanglidongeric1995/lutlayermanagerofx",url:"https://github.com/zhanglidongeric1995/lutlayermanagerofx",desc:"达芬奇 OpenFX LUT 图层管理插件",type:"OFX",win:"p",lang:"C++",stars:1},
+  {repo:"resolve-pen-mask",full:"featherofawhale-crypto/resolve-pen-mask",url:"https://github.com/featherofawhale-crypto/resolve-pen-mask",desc:"开源达芬奇原生 Fusion 钢笔蒙版（MIT）",type:"Fusion",win:"y",lang:"HTML",stars:0,zh:true},
+  {repo:"resolve-inner-glow",full:"featherofawhale-crypto/resolve-inner-glow",url:"https://github.com/featherofawhale-crypto/resolve-inner-glow",desc:"开源达芬奇原生 Fusion 内发光插件（MIT）",type:"Fusion",win:"y",lang:"Python",stars:0,zh:true},
+  {repo:"davinci-fusion-tools",full:"totox33610/davinci-fusion-tools",url:"https://github.com/totox33610/davinci-fusion-tools",desc:"免费达芬奇 Fusion 宏 / Fuse / 工具合集",type:"Fusion",win:"y",lang:"Lua",stars:0},
+  {repo:"fusion-flow",full:"misonlarp/fusion-flow",url:"https://github.com/misonlarp/fusion-flow",desc:"达芬奇 Fusion 贝塞尔曲线编辑器",type:"Fusion",win:"y",lang:"Batchfile",stars:19},
+  {repo:"fuse-textify",full:"nwhetsell/fuse-textify",url:"https://github.com/nwhetsell/fuse-textify",desc:"达芬奇/Fusion 中的图像转文字 Fuse",type:"Fusion",win:"y",lang:"Lua",stars:1},
+  {repo:"resolve-opencaptions",full:"david-ca6/resolve-opencaptions",url:"https://github.com/david-ca6/resolve-opencaptions",desc:"免费开源多轨字幕→Text+ 工具，无订阅无墙",type:"Fusion",win:"y",lang:"Python",stars:42},
+  {repo:"utility-dctls (thatcherfreeman)",full:"thatcherfreeman/utility-dctls",url:"https://github.com/thatcherfreeman/utility-dctls",desc:"创意与实用 DCTL 合集，持续更新",type:"DCTL",win:"y",lang:"C",stars:429},
+  {repo:"dctl (juanpablozambrano)",full:"juanpablozambrano/dctl",url:"https://github.com/juanpablozambrano/dctl",desc:"DCTL 合集（创意调色工具）",type:"DCTL",win:"y",lang:"C",stars:325},
+  {repo:"dwg-transforms",full:"thatcherfreeman/dwg-transforms",url:"https://github.com/thatcherfreeman/dwg-transforms",desc:"各色彩空间→DaVinci Wide Gamut/Intermediate 转换 DCTL",type:"DCTL",win:"y",lang:"C",stars:111},
+  {repo:"agx-resolve",full:"sobotka/agx-resolve",url:"https://github.com/sobotka/agx-resolve",desc:"AgX 画面形成（Picture Formation）的达芬奇实现",type:"DCTL",win:"y",lang:"C",stars:111},
+  {repo:"halation-dctl",full:"hotgluebanjo/halation-dctl",url:"https://github.com/hotgluebanjo/halation-dctl",desc:"简洁的光晕（Halation）DCTL",type:"DCTL",win:"y",lang:"C",stars:102},
+  {repo:"tetrainterp-dctl",full:"hotgluebanjo/tetrainterp-dctl",url:"https://github.com/hotgluebanjo/tetrainterp-dctl",desc:"四面体插值 DCTL 的补充扩展",type:"DCTL",win:"y",lang:"C",stars:81},
+  {repo:"dctl-mlaa",full:"olduvai-jp/dctl-mlaa",url:"https://github.com/olduvai-jp/dctl-mlaa",desc:"形态学抗锯齿（MLAA）移植为 DCTL",type:"DCTL",win:"y",lang:"C",stars:15},
+  {repo:"dji-dlog2-to-aces-idt",full:"aj3dvfx/dji-dlog2-to-aces-idt",url:"https://github.com/aj3dvfx/dji-dlog2-to-aces-idt",desc:"DJI D-Log2 / D-Gamut2 的 ACES 输入变换（IDT）",type:"DCTL",win:"y",lang:"-",stars:0},
+  {repo:"cam16-colorfulness-scale",full:"dragos10-boss/cam16-colorfulness-scale",url:"https://github.com/dragos10-boss/cam16-colorfulness-scale",desc:"基于 CAM16、保色相/亮度的饱和度控制 DCTL",type:"DCTL",win:"y",lang:"C",stars:2},
+  {repo:"martis-bleach-bypass",full:"lakravana/martis-bleach-bypass",url:"https://github.com/lakravana/martis-bleach-bypass",desc:"经典漂白旁路（Skip Bleach）工艺模拟 DCTL",type:"DCTL",win:"y",lang:"C",stars:0},
+  {repo:"gameboy_vision_pro",full:"lakravana/gameboy_vision_pro",url:"https://github.com/lakravana/gameboy_vision_pro",desc:"复古 Game Boy 风格化 DCTL",type:"DCTL",win:"y",lang:"C",stars:0},
+  {repo:"nostalgik-nes",full:"lakravana/nostalgik-nes",url:"https://github.com/lakravana/nostalgik-nes",desc:"NES 复古主机风格化：分辨率/色彩量化模拟 DCTL",type:"DCTL",win:"y",lang:"C",stars:0},
+  {repo:"tampere_chromatic_hue",full:"lakravana/tampere_chromatic_hue",url:"https://github.com/lakravana/tampere_chromatic_hue",desc:"色相几何校正 DCTL",type:"DCTL",win:"y",lang:"C",stars:0},
+  {repo:"davinci-linux-aac-codec",full:"toxblh/davinci-linux-aac-codec",url:"https://github.com/toxblh/davinci-linux-aac-codec",desc:"Linux 版 AAC 音频编码插件",type:"Encoder",win:"n",lang:"C++",stars:121,platform:"linux"},
+  {repo:"dvcp-vaapi",full:"nowrep/dvcp-vaapi",url:"https://github.com/nowrep/dvcp-vaapi",desc:"Linux VAAPI 硬件编码插件",type:"Encoder",win:"n",lang:"C++",stars:47,platform:"linux"},
+  {repo:"resolve-linux-studio-aac-fdk-encoder-plugin",full:"hexitnz/resolve-linux-studio-aac-fdk-encoder-plugin",url:"https://github.com/hexitnz/resolve-linux-studio-aac-fdk-encoder-plugin",desc:"Linux Studio 高质量 AAC（FDK）编码插件",type:"Encoder",win:"n",lang:"C++",stars:29,platform:"linux"},
+  {repo:"dvcp-aac",full:"gloriouseggroll/dvcp-aac",url:"https://github.com/gloriouseggroll/dvcp-aac",desc:"AAC 音频编解码插件，含导入支持（Linux）",type:"Encoder",win:"n",lang:"C++",stars:27,platform:"linux"},
+  {repo:"resolve-aacfix",full:"josephg/resolve-aacfix",url:"https://github.com/josephg/resolve-aacfix",desc:"二进制补丁库，恢复 Linux 版 AAC 音频支持",type:"Encoder",win:"n",lang:"Shell",stars:25,platform:"linux"},
+  {repo:"davincibox",full:"zelikos/davincibox",url:"https://github.com/zelikos/davincibox",desc:"Linux 上安装与运行达芬奇的容器化方案（含运行时依赖处理）",type:"Script",win:"n",lang:"Shell",stars:1009,platform:"linux"},
+  {repo:"docker-davinci-resolve-project-server",full:"elliotmatson/docker-davinci-resolve-project-server",url:"https://github.com/elliotmatson/docker-davinci-resolve-project-server",desc:"Docker 化项目服务器：自动备份 + 新版 PostgreSQL",type:"Script",win:"y",lang:"Python",stars:320},
+  {repo:"davinci-helper",full:"h3rz3n/davinci-helper",url:"https://github.com/h3rz3n/davinci-helper",desc:"Linux 上的达芬奇伴侣应用",type:"Script",win:"n",lang:"Python",stars:316,platform:"linux"},
+  {repo:"davinci-resolve-scripts (x-raym)",full:"x-raym/davinci-resolve-scripts",url:"https://github.com/x-raym/davinci-resolve-scripts",desc:"基于 Resolve Script API 的实用脚本合集",type:"Script",win:"y",lang:"Lua",stars:98},
+  {repo:"pybmd",full:"wheheohu/pybmd",url:"https://github.com/wheheohu/pybmd",desc:"达芬奇 API 的 Python 封装库",type:"Script",win:"y",lang:"Python",stars:36},
+  {repo:"badwords",full:"veritus-git/badwords",url:"https://github.com/veritus-git/badwords",desc:"更好的达芬奇文本化剪辑体验",type:"Script",win:"y",lang:"Python",stars:41},
+  {repo:"colortablething",full:"f4mi/colortablething",url:"https://github.com/f4mi/colortablething",desc:"向达芬奇注入自定义色彩匹配表",type:"Script",win:"y",lang:"Python",stars:27},
+  {repo:"subfix",full:"hooperh/subfix",url:"https://github.com/hooperh/subfix",desc:"达芬奇字幕工作流脚本",type:"Script",win:"y",lang:"Lua",stars:31},
+  {repo:"davinci-21-chinese-manual",full:"akahoz94/davinci-21-chinese-manual",url:"https://github.com/akahoz94/davinci-21-chinese-manual",desc:"达芬奇 21 中文操作手册离线浏览器 + AI skill（快捷键速查/功能检索/内置插件中英对照）",type:"Script",win:"y",lang:"HTML",stars:33,zh:true},
+  {repo:"reference-match",full:"xrz1411/reference-match",url:"https://github.com/xrz1411/reference-match",desc:"本地优先参考图色彩匹配工具：分析色调风格并生成匹配方案",type:"Script",win:"y",lang:"Python",stars:52,zh:true},
+  {repo:"resolve-nuke-bridge",full:"octavioah/resolve-nuke-bridge",url:"https://github.com/octavioah/resolve-nuke-bridge",desc:"在达芬奇与 Nuke 之间互传片段的 Python 桥",type:"Script",win:"y",lang:"Python",stars:18},
+  {repo:"openosv",full:"kemerd/openosv",url:"https://github.com/kemerd/openosv",desc:"DJI Osmo 360（.OSV）开源工作流：原生导入 + CUDA 加速（Premiere/达芬奇）",type:"Script",win:"y",lang:"C++",stars:14},
+  {repo:"beat-detection",full:"emjjkk/beat-detection",url:"https://github.com/emjjkk/beat-detection",desc:"节拍/起音检测，生成时间戳与 .edl 标记文件供达芬奇使用",type:"Script",win:"y",lang:"Python",stars:19},
+];
+
+const winMap={y:"<span class='win y'>✓ 原生</span>",p:"<span class='win p'>⚠ 需确认</span>",n:"<span class='win n'>✗</span>"};
+const platMap={both:"<span class='plat pf-both'>🖥 通用</span>",mac:"<span class='plat pf-mac'><svg width='12' height='12' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-1px'><path d='M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z'/></svg> Mac</span>",win:"<span class='plat pf-win'><svg width='13' height='13' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:-1px'><path d='M0 3.45L9.9 2.1v9.55H0V3.45zm10.95-.85L24 0v11.6H10.95V2.6zM0 12.35h9.9v9.65L0 20.6v-8.25zm10.95 0H24V24l-13.05-2.25V12.35z'/></svg> Win</span>",linux:"<span class='plat pf-linux'>🐧 Linux</span>"};
+const tbody=document.getElementById('tbody');
+const empty=document.getElementById('empty');
+let curFilter='all', curPlat='all', curSearch='', curSort='stars', curDir=-1;
+
+function render(){
+  let rows=DATA.filter(r=>{
+    if(curFilter==='zh'){ if(!r.zh) return false; }
+    else if(curFilter!=='all' && r.type!==curFilter) return false;
+    if(curPlat!=='all' && (r.platform||'both')!==curPlat) return false;
+    if(curSearch){
+      const q=curSearch.toLowerCase();
+      if(!(r.repo.toLowerCase().includes(q)||r.full.toLowerCase().includes(q)||r.desc.toLowerCase().includes(q)||r.type.toLowerCase().includes(q))) return false;
+    }
+    return true;
+  });
+  rows.sort((a,b)=>{
+    let va=a[curSort],vb=b[curSort];
+    if(curSort==='stars'){va=a.stars;vb=b.stars}
+    if(curSort==='platform'){va=a.platform||'both';vb=b.platform||'both'}
+    if(typeof va==='string'){va=va.toLowerCase();vb=(vb+'').toLowerCase()}
+    if(va<vb)return -1*curDir;
+    if(va>vb)return 1*curDir;
+    return 0;
+  });
+  tbody.innerHTML=rows.map(r=>`<tr>
+    <td><div class="repo"><a href="${r.url}">${r.repo}</a>${r.zh?' <span style="color:var(--red);font-size:10px;border:1px solid var(--red);padding:1px 5px;border-radius:3px;vertical-align:middle">中文</span>':''}<a class="full" href="${r.url}">${r.url}</a></div></td>
+    <td class="desc">${r.desc}</td>
+    <td><span class="tag ${r.type}">${r.type}</span></td>
+    <td>${platMap[r.platform||'both']}</td>
+    <td class="lang">${r.lang}</td>
+    <td class="stars">${r.stars.toLocaleString()}</td>
+  </tr>`).join('');
+  empty.style.display=rows.length?'none':'block';
+  document.getElementById('totalCount').textContent=DATA.length;
+}
+
+document.getElementById('filters').addEventListener('click',e=>{
+  if(e.target.classList.contains('btn')){
+    document.querySelectorAll('#filters .btn').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    curFilter=e.target.dataset.f;
+    render();
+  }
+});
+document.getElementById('platFilters').addEventListener('click',e=>{
+  if(e.target.classList.contains('btn')){
+    document.querySelectorAll('#platFilters .btn').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    curPlat=e.target.dataset.p;
+    render();
+  }
+});
+document.getElementById('search').addEventListener('input',e=>{curSearch=e.target.value;render()});
+document.querySelectorAll('thead th').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const s=th.dataset.sort;
+    if(curSort===s){curDir*=-1}else{curSort=s;curDir=(s==='stars')?-1:1}
+    document.querySelectorAll('thead th .arr').forEach(a=>a.textContent='');
+    th.querySelector('.arr').textContent=curDir>0?'▲':'▼';
+    render();
+  });
+});
+render();
+</script>
+
+
+</body></html>
