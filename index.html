@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="dark"><head>
+<html lang="zh-CN" data-theme="light"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>达芬奇开源插件汇总（一个成熟的剪辑猿收集整理）</title>
 <style>
   :root{
-    --bg:#0f1117; --bg2:#161922; --bg3:#1d2130; --border:#2a2f3d; --border2:#363c4e;
-    --text:#e6e8ee; --text2:#9aa0ad; --text3:#6b7180;
-    --accent:#5b8cff; --accent2:#7c5cff; --green:#3fb950; --yellow:#d29922; --red:#f85149;
-    --tag-dctl:#a371f7; --tag-ofx:#5b8cff; --tag-fusion:#3fb950; --tag-enc:#d29922; --tag-ai:#f778ba; --tag-script:#58a6ff;
+    --bg:#ffffff; --bg2:#f6f8fa; --bg3:#eff2f5; --border:#d8dee4; --border2:#d0d7de;
+    --text:#1f2328; --text2:#59636e; --text3:#818b98;
+    --accent:#0969da; --accent2:#8250df; --green:#1a7f37; --yellow:#9a6700; --red:#cf222e;
+    --tag-dctl:#8250df; --tag-ofx:#0969da; --tag-fusion:#1a7f37; --tag-enc:#9a6700; --tag-ai:#bf3989; --tag-script:#0550ae;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;line-height:1.6;padding:0 0 60px}
   a{color:var(--accent);text-decoration:none}
   a:hover{text-decoration:underline}
   .wrap{max-width:1280px;margin:0 auto;padding:0 20px}
-  header{background:linear-gradient(135deg,#161922,#1d2130);border-bottom:1px solid var(--border);padding:36px 0 28px}
+  header{background:linear-gradient(135deg,#f6f8fa,#eff2f5);border-bottom:1px solid var(--border);padding:36px 0 28px}
   header h1{font-size:26px;font-weight:700;letter-spacing:.3px}
   header h1 .sub{color:var(--text2);font-weight:400;font-size:15px;margin-left:8px}
   .meta{color:var(--text2);font-size:13px;margin-top:10px}
@@ -56,10 +56,10 @@
   .tag.AI{background:rgba(247,120,186,.15);color:var(--tag-ai);border:1px solid rgba(247,120,186,.3)}
   .tag.Script{background:rgba(88,166,255,.15);color:var(--tag-script);border:1px solid rgba(88,166,255,.3)}
   .plat{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:600;white-space:nowrap;margin-left:8px;vertical-align:middle}
-  .plat.pf-both{background:rgba(88,166,255,.13);color:#9cc2ff;border:1px solid rgba(88,166,255,.3)}
-  .plat.pf-mac{background:rgba(63,185,80,.15);color:#5fd17a;border:1px solid rgba(63,185,80,.35)}
-  .plat.pf-win{background:rgba(210,153,34,.15);color:#e0b35a;border:1px solid rgba(210,153,34,.35)}
-  .plat.pf-linux{background:rgba(87,227,207,.13);color:#5fe3cf;border:1px solid rgba(87,227,207,.3)}
+  .plat.pf-both{background:rgba(9,105,218,.08);color:#0550ae;border:1px solid rgba(88,166,255,.3)}
+  .plat.pf-mac{background:rgba(26,127,55,.10);color:#1a7f37;border:1px solid rgba(63,185,80,.35)}
+  .plat.pf-win{background:rgba(154,103,0,.10);color:#9a6700;border:1px solid rgba(210,153,34,.35)}
+  .plat.pf-linux{background:rgba(10,122,107,.10);color:#0a7a6b;border:1px solid rgba(87,227,207,.3)}
   .lang{color:var(--text3);font-size:12px}
   .empty{padding:40px;text-align:center;color:var(--text3)}
   .note{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:14px 18px;margin:18px 0;font-size:13px;color:var(--text2)}
