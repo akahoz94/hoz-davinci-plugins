@@ -1,0 +1,19 @@
+name: 自动采集达芬奇开源插件
+on:
+  schedule:
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 运行自动采集
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python auto_collect.py
