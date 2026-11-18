@@ -72,12 +72,19 @@
   .disclaimer p{margin:0 0 6px}
   .disclaimer p:last-child{margin-bottom:0}
   .disclaimer b{color:var(--text1)}
+
+  .author-link{color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent);cursor:pointer}
+  .author-link:hover{color:#fb7299;border-bottom-color:#fb7299;text-decoration:none}
+  .author-card{display:flex;justify-content:center;margin:22px auto 4px}
+  .author-card a{display:inline-flex;align-items:center;gap:8px;padding:9px 20px;background:var(--bg);border:1px solid var(--border2);border-radius:24px;color:var(--text);font-weight:600;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.05);transition:.15s}
+  .author-card a:hover{border-color:#fb7299;color:#fb7299;text-decoration:none;transform:translateY(-1px)}
+  .author-card svg{width:18px;height:18px}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <h1>达芬奇开源插件汇总（一个成熟的剪辑猿收集整理）</h1>
+    <h1>达芬奇开源插件汇总（<a class="author-link" href="https://space.bilibili.com/3546733468453115" target="_blank" rel="noopener" title="访问一个成熟的剪辑猿的 B 站主页">一个成熟的剪辑猿</a>收集整理）</h1>
     <div class="meta">数据采集于 GitHub，按 Stars 排序 · 收录 Windows / Mac / Linux 跨平台及专属项目，并在「平台」列标注平台 · 2026-11-18 第三轮增补（共 257 条）</div>
     <div class="stats">
       <div class="stat"><div class="n" id="totalCount">257</div><div class="l">收录插件总数</div></div>
@@ -1796,6 +1803,12 @@
     <p>安装、使用前请务必前往各项目<b>源仓库仔细阅读使用说明、许可证与兼容性要求</b>，并确认其适用于你的达芬奇版本（注意：多数 MCP / 脚本类工具需 Studio 版，免费版不开放脚本接口）。</p>
     <p>动手前请<b>备份好你的工程文件与数据库</b>。</p>
     <p>使用上述任何项目造成的<b>数据丢失、工程损坏、系统异常或其他任何问题，整理者概不负责，所有风险由使用者自行承担</b>。</p>
+  </div>
+
+  <div class="author-card">
+    <a href="https://space.bilibili.com/3546733468453115" target="_blank" rel="noopener" title="访问我的 B 站主页">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 3.2a1.4 1.4 0 0 1 0 2.8h-1.1l2.4 2.4a3 3 0 0 1 .9 2.1V18a3 3 0 0 1-3 3H7.2a3 3 0 0 1-3-3v-7.5a3 3 0 0 1 .9-2.1l2.4-2.4H6.4a1.4 1.4 0 1 1 0-2.8h11.2zM9.5 11a1.3 1.3 0 0 0-1.3 1.3v3.4a1.3 1.3 0 0 0 2.6 0v-3.4A1.3 1.3 0 0 0 9.5 11zm5 0a1.3 1.3 0 0 0-1.3 1.3v3.4a1.3 1.3 0 0 0 2.6 0v-3.4A1.3 1.3 0 0 0 14.5 11z"/></svg><span>整理者：一个成熟的剪辑猿 · 访问我的 B 站主页</span>
+    </a>
   </div>
 </footer>
 

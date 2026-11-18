@@ -44,4 +44,4 @@ git clone https://github.com/akahoz94/hoz-davinci-plugins.git
 
 ---
 
-整理：[@akahoz94](https://github.com/akahoz94)（一个成熟的剪辑猿）
+整理：[@akahoz94](https://github.com/akahoz94)（[一个成熟的剪辑猿 · B 站主页](https://space.bilibili.com/3546733468453115)）
